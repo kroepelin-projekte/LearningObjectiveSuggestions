@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . "/../vendor/autoload.php";
-
 use ILIAS\DI\Container;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\Config;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\ConfigProvider;
@@ -101,15 +99,6 @@ class ilLearningObjectiveSuggestionsPlugin extends ilCronHookPlugin
     protected function init(): void
     {
         parent::init();
-        if (file_exists(__DIR__ . "/../../../../EventHandling/EventHook/UserDefaults/vendor/autoload.php")) {
-            require_once __DIR__ . "/../../../../EventHandling/EventHook/UserDefaults/vendor/autoload.php";
-        }
-        if (file_exists(__DIR__ . "/../../../../UIComponent/UserInterfaceHook/LearningObjectiveSuggestionsUI/vendor/autoload.php")) {
-            require_once __DIR__ . "/../../../../UIComponent/UserInterfaceHook/LearningObjectiveSuggestionsUI/vendor/autoload.php";
-        }
-        if (file_exists(__DIR__ . "/../../../../UIComponent/UserInterfaceHook/ParticipationCertificate/vendor/autoload.php")) {
-            require_once __DIR__ . "/../../../../UIComponent/UserInterfaceHook/ParticipationCertificate/vendor/autoload.php";
-        }
     }
 
     protected function beforeUninstall(): bool

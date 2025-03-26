@@ -2,7 +2,7 @@
 
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\DclExportMiddleware;
 
-require_once __DIR__ ."../../../../../WebServices/SoapHook/DataCollectionSOAPServices/vendor/autoload.php";
+//require_once __DIR__ ."../../../../../WebServices/SoapHook/DataCollectionSOAPServices/vendor/autoload.php";
 
 
 use ilDclBaseRecordModel;
