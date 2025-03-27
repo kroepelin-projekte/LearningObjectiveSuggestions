@@ -55,16 +55,18 @@ class InternalMail {
     {
 		$mailer = new \ilMail($this->sender->getId());
 		$mailer->setSaveInSentbox(true);
-		$result = $mailer->sendMail(
-			$this->receiver->getLogin(),
-			implode(',', $this->cc),
-			implode(',', $this->bcc),
-			$this->subject,
-			$this->body,
-			array(),
-			false
-		);
-		if ($result) {
+
+        $result = $mailer->enqueue(
+            $this->receiver->getLogin(),
+            implode(',', $this->cc),
+            implode(',', $this->bcc),
+            $this->subject,
+            $this->body,
+            [],
+            false
+        );
+
+		if (!empty($result)) {
 			$message = (is_array($result)) ? implode(', ', $result) : $result;
 			throw new \ilException("Failed to send mail with error: " . $message);
 		}

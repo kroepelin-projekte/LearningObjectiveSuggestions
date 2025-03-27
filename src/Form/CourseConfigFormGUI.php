@@ -76,15 +76,19 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI {
 			$options[$objective->getId()] = $objective->getTitle();
 		}
 		$item->setOptions($options);
-		$item->setValue(json_decode($this->config->get($item->getPostVar()), true));
-		$this->addItem($item);
+
+        $jsonString = $this->config->get($item->getPostVar());
+        $item->setValue(json_decode($jsonString ?: '{}', true));
+        $this->addItem($item);
 
 		$item = clone $item;
 		$item->setTitle($this->pl->txt("objectives_extended"));
 		$item->setPostVar('learning_objectives_extended');
 		$item->setInfo($this->pl->txt("objectives_extended_info"));
-		$item->setValue(json_decode($this->config->get($item->getPostVar()), true));
-		$this->addItem($item);
+
+        $jsonString = $this->config->get($item->getPostVar());
+        $item->setValue(json_decode($jsonString ?: '{}', true));
+        $this->addItem($item);
 
 		$item = new \ilNumberInputGUI($this->pl->txt("min_amount_suggestions"), 'min_amount_suggestions');
 		$item->setInfo($this->pl->txt("min_amount_suggestions_info"));
@@ -162,7 +166,8 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI {
                 $item->addInput($subitem);
 	        $item->setRequired(true);
 
-        $item->setValue((array) json_decode($this->config->get($item->getPostVar()),true));
+        $jsonString = $this->config->get($item->getPostVar()) ?: '[]';
+        $item->setValue((array) json_decode($jsonString, true));
         $this->addItem($item);
 	$item->setRequired(false);    
     }
