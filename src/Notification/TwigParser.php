@@ -1,5 +1,7 @@
 <?php
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 
 class TwigParser implements Parser {
 	public function parse(string $template, array $placeholders): string
@@ -19,14 +21,16 @@ class TwigParser implements Parser {
 			return false;
 		}
 	}
-	protected function getTwig(): ?\Twig_Environment
+	protected function getTwig(): ?Environment
     {
 		static $instance = NULL;
 		if ($instance !== NULL) {
 			return $instance;
 		}
-		$loader = new \Twig_Loader_Array([]);
-		$twig = new \Twig_Environment($loader, array( 'autoescape' => false ));
+		/*$loader = new \Twig_Loader_Array([]);
+		$twig = new \Twig_Environment($loader, array( 'autoescape' => false ));*/
+        $loader = new ArrayLoader([]);
+        $twig = new Environment($loader, ['autoescape' => false]);
 		$instance = $twig;
 
 		return $twig;
