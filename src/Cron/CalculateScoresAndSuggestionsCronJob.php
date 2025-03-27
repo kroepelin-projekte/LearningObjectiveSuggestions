@@ -15,6 +15,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjective
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestionGenerator;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
+use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 class CalculateScoresAndSuggestionsCronJob extends \ilCronJob {
 
@@ -55,9 +56,9 @@ class CalculateScoresAndSuggestionsCronJob extends \ilCronJob {
     {
 		return true;
 	}
-	public function getDefaultScheduleType(): int
+	public function getDefaultScheduleType(): CronJobScheduleType
     {
-		return self::SCHEDULE_TYPE_IN_MINUTES;
+        return CronJobScheduleType::SCHEDULE_TYPE_IN_MINUTES;
 	}
 	function getDefaultScheduleValue(): int
     {
