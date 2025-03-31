@@ -43,11 +43,23 @@ class LearningObjectiveSuggestionModification {
 		$new_suggestions = array();
 		$added_suggestions = array();
 		foreach ($learning_objectives as $objective) {
+
+            // Filter current suggestions to find a match
+            $filtered_suggestions = array_filter($current_suggestions, function ($suggestion) use ($objective) {
+                /** @var $suggestion LearningObjectiveSuggestion */
+                return ($suggestion->getObjectiveId() == $objective->getId());
+            });
+
+            // Get the last element of the filtered suggestions
+            $suggestion = !empty($filtered_suggestions) ? array_pop($filtered_suggestions) : null;
+
+
 			// Check if the objective is already part of the current suggestions
-			$suggestion = array_pop(array_filter($current_suggestions, function ($suggestion) use ($objective) {
-				/** @var $suggestion LearningObjectiveSuggestion */
+			/*$suggestion = array_pop(array_filter($current_suggestions, function ($suggestion) use ($objective) {
+				// @var $suggestion LearningObjectiveSuggestion
 				return ($suggestion->getObjectiveId() == $objective->getId());
-			}));
+			}));*/
+
 			if ($suggestion) {
 				// This objective is part of the current suggestions, so we will update its sorting
 				$new_suggestions[] = $suggestion;
