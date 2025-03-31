@@ -44,12 +44,12 @@ class Notification extends \ActiveRecord {
 	 */
 	protected int $course_obj_id;
 	/**
-	 * @var string
+	 * @var string|null
 	 *
 	 * @db_has_field    true
 	 * @db_fieldtype    timestamp
 	 */
-	protected string $sent_at;
+	protected ?string $sent_at;
 	/**
 	 * @var int
 	 *
@@ -82,7 +82,7 @@ class Notification extends \ActiveRecord {
     {
 		return $this->sent_at;
 	}
-	public function setSentAt(string $sent_at): void
+	public function setSentAt(?string $sent_at): void
     {
 		$this->sent_at = $sent_at;
 	}
