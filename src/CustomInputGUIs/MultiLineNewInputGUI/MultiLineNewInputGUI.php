@@ -69,7 +69,7 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         foreach ($this->getInputs() as $i => $inputs) {
             foreach ($inputs as $org_post_var => $input) {
                 // still needed?
-                $b_value = $_POST[$input->getPostVar()];
+                #$b_value = $_POST[$input->getPostVar()];
                 if (($_POST[$this->getPostVar()] !== null ) && (key_exists($i,$_POST[$this->getPostVar()]))) {
                     $org_post = $_POST[$this->getPostVar()][$i][$org_post_var];
                     //null not alowed for min, max (and role though never seen)
@@ -82,7 +82,7 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                     }
                 }
                 // still needed (see above)?
-                $_POST[$input->getPostVar()] = $b_value;
+                #$_POST[$input->getPostVar()] = $b_value;
             }
         }
 

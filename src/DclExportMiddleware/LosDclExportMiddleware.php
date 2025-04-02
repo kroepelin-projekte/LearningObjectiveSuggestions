@@ -13,11 +13,13 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Cron\SendSuggestionsCronJob;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveCourse;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
+
 //use srag\Plugins\DataCollectionSOAPServices\RecordsOfDataCollectionViewExtendMiddleware;
 
-class LosDclExportMiddleware implements RecordsOfDataCollectionViewExtendMiddleware {
-
-    public static function new():RecordsOfDataCollectionViewExtendMiddleware {
+class LosDclExportMiddleware implements RecordsOfDataCollectionViewExtendMiddleware
+{
+    public static function new(): RecordsOfDataCollectionViewExtendMiddleware
+    {
         return new static();
     }
 
@@ -27,12 +29,12 @@ class LosDclExportMiddleware implements RecordsOfDataCollectionViewExtendMiddlew
 
         $record_data["UsrId"] = $record->getOwner();
         $record_data["PercentageDet"] = -1;
-        $record_data["StudyProgram"] = NULL;
+        $record_data["StudyProgram"] = null;
         $record_data["DclRefid"] = $record->getTable()->getCollectionObject()->getRefId();
         $record_data["DclTitle"] = $record->getTable()->getCollectionObject()->getTitle();
 
 
-        if(count($crs_ref_ids) === 0) {
+        if (count($crs_ref_ids) === 0) {
             return $record_data;
         }
 
@@ -45,10 +47,10 @@ class LosDclExportMiddleware implements RecordsOfDataCollectionViewExtendMiddlew
 
 
 
-        $record_data["PercentageDet"] = SendSuggestionsCronJob::getTestUserResult($record->getOwner(),$crs_ref_id);
+        $record_data["PercentageDet"] = SendSuggestionsCronJob::getTestUserResult($record->getOwner(), $crs_ref_id);
         $study_program = $study_program_query->getByUser(new User(new ilObjUser($record->getOwner())));
-        if(is_object($study_program)) {
-            $record_data["StudyProgram"] =  $study_program->getTitle();
+        if (is_object($study_program)) {
+            $record_data["StudyProgram"] = $study_program->getTitle();
         }
         return $record_data;
     }

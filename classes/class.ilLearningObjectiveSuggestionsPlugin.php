@@ -11,6 +11,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Notification;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Score\LearningObjectiveScore;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
+
 //use srag\CustomInputGUIs\LearningObjectiveSuggestions\Loader\CustomInputGUIsLoaderDetector;
 
 /**
@@ -20,15 +21,14 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjective
  */
 class ilLearningObjectiveSuggestionsPlugin extends ilCronHookPlugin
 {
-
-    const PLUGIN_ID = "dhbwautolo";
-    const PLUGIN_NAME = "LearningObjectiveSuggestions";
+    public const PLUGIN_ID = "dhbwautolo";
+    public const PLUGIN_NAME = "LearningObjectiveSuggestions";
     protected static ?ilLearningObjectiveSuggestionsPlugin $instance = null;
     protected static ?array $cron_instances = null;
 
     public static function getInstance(): ilLearningObjectiveSuggestionsPlugin
     {
-        if (static::$instance === NULL) {
+        if (static::$instance === null) {
             global $DIC;
 
             /** @var $component_factory ilComponentFactory */
@@ -46,7 +46,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilCronHookPlugin
     {
         global $DIC;
         $ilDB = $DIC->database();
-        if (static::$cron_instances === NULL) {
+        if (static::$cron_instances === null) {
             $config = new ConfigProvider();
             $log = new Log();
             $cron1 = new CalculateScoresAndSuggestionsCronJob($ilDB, $config, $log);
@@ -63,11 +63,10 @@ class ilLearningObjectiveSuggestionsPlugin extends ilCronHookPlugin
     protected ilDBInterface $db;
 
     public function __construct(
-        ilDBInterface              $db,
+        ilDBInterface $db,
         ilComponentRepositoryWrite $component_repository,
-        string                     $id
-    )
-    {
+        string $id
+    ) {
         global $DIC;
         parent::__construct($db, $component_repository, $id);
         $this->db = $DIC->database();

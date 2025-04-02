@@ -1,53 +1,57 @@
 <?php
+
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective;
 
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 
-class LearningObjectiveCourse {
-	protected \ilObjCourse $course;
-	/**
-	 * LearningObjectiveCourse constructor.
-	 */
-	public function __construct(\ilObjCourse $course) {
-		$this->course = $course;
-	}
-	public function getILIASCourse(): \ilObjCourse
+class LearningObjectiveCourse
+{
+    protected \ilObjCourse $course;
+    /**
+     * LearningObjectiveCourse constructor.
+     */
+    public function __construct(\ilObjCourse $course)
     {
-		return $this->course;
-	}
-	public function getId(): int
+        $this->course = $course;
+    }
+    public function getILIASCourse(): \ilObjCourse
     {
-		return $this->course->getId();
-	}
-	public function getTitle(): string
+        return $this->course;
+    }
+    public function getId(): int
     {
-		return $this->course->getTitle();
-	}
-	public function getRefId(): int
+        return $this->course->getId();
+    }
+    public function getTitle(): string
     {
-		return $this->course->getRefId();
-	}
-	public function getIsCronInactive(): bool
+        return $this->course->getTitle();
+    }
+    public function getRefId(): int
     {
-		$config = new CourseConfigProvider($this);
-		return $config->getIsCronInactive();
-	}
-	public function getLink(): string
+        return $this->course->getRefId();
+    }
+    public function getIsCronInactive(): bool
     {
-		return \ilLink::_getStaticLink($this->getRefId(), 'crs');
-	}
-	/**
-	 * Get the user-IDs of all members of this course
-	 */
-	public function getMemberIds(): array
+        $config = new CourseConfigProvider($this);
+        return $config->getIsCronInactive();
+    }
+    public function getLink(): string
     {
-		$participants = \ilCourseParticipants::getInstanceByObjId($this->getId());
-		return $participants->getMembers();
-	}
-	function __toString() {
-		return '[' . implode(', ', array(
-				$this->getRefId(),
-				$this->getTitle()
-			)) . ']';
-	}
+        return \ilLink::_getStaticLink($this->getRefId(), 'crs');
+    }
+    /**
+     * Get the user-IDs of all members of this course
+     */
+    public function getMemberIds(): array
+    {
+        $participants = \ilCourseParticipants::getInstanceByObjId($this->getId());
+        return $participants->getMembers();
+    }
+    public function __toString()
+    {
+        return '[' . implode(', ', array(
+                $this->getRefId(),
+                $this->getTitle()
+            )) . ']';
+    }
 }
