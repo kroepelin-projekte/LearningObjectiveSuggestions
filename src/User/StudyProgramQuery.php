@@ -34,7 +34,8 @@ class StudyProgramQuery
         // The data is separated with an arrow, wtf...
         //13.04.2021 Modification DHBW from old master 
           if ($this->isCascadingSelect()) {
-        list($level1, $title, $_) = array_map('trim', explode("→", $title));
+              $titleExploded = explode("→", $title);
+              list($level1, $title, $_) = array_map('trim', $titleExploded);
 		  if ($title=='') {
 			  $title=$level1;
 		  }
