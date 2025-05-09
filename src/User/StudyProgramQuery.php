@@ -104,6 +104,6 @@ class StudyProgramQuery
         $udf = \ilUserDefinedFields::_getInstance();
         $data = $udf->getDefinition($this->config->get('udf_id_study_program'));
         // type is hardcoded here, since CascadingSelect may be not installed
-        return ($data['field_type'] === "51");
+        return ((string) $data['field_type'] === "51");
     }
 }
