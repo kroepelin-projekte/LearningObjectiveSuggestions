@@ -142,7 +142,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI {
 		// Format label to lastname, firstname, login
 		$users->items = array_map(function (stdClass $user) {
 			$labels = preg_split("/[(, )( \[)]/", $user->label, - 1, PREG_SPLIT_NO_EMPTY);
-			$labels[2] = substr($labels[2], 0, - 1);
+			$labels[2] = isset($labels[2]) ? substr($labels[2], 0, - 1) : '';
 			$labels = [ $labels[0], $labels[1], $labels[2] ];
 			return [
 				"label" => $labels,
