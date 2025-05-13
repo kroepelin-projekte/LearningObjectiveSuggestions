@@ -15,7 +15,7 @@ class StudyProgramQuery
     public function __construct(CourseConfigProvider $config)
     {
         $this->config = $config;
-	$this->udf_setting = new \ilSetting('udfd');
+        $this->udf_setting = new \ilSetting('udfd');
     }
 
     /**
@@ -28,22 +28,22 @@ class StudyProgramQuery
         $data = new \ilUserDefinedData($user->getId());
         $title = $data->get('f_' . $this->config->get('udf_id_study_program'));
 
-	if ($title == null) {
-		return null;
-	}
+        if ($title == null) {
+            return null;
+        }
         // The data is separated with an arrow, wtf...
-        //13.04.2021 Modification DHBW from old master 
-          if ($this->isCascadingSelect()) {
-              $titleExploded = explode("→", $title);
-              list($level1, $title, $_) = array_pad(array_map('trim', $titleExploded), 3, null);
+        //13.04.2021 Modification DHBW from old master
+        if ($this->isCascadingSelect()) {
+            $titleExploded = explode("→", $title);
+            list($level1, $title, $_) = array_pad(array_map('trim', $titleExploded), 3, null);
 
-              if (empty($title)) {
-                  $title = $level1;
-              }
-		  if ($title=='') {
-			  $title=$level1;
-		  }
-          }
+            if (empty($title)) {
+                $title = $level1;
+            }
+            if ($title == '') {
+                $title = $level1;
+            }
+        }
         $filtered = array_filter($this->getAll(), function ($study_program) use ($title) {
             /** @var $study_program StudyProgram */
             return ($study_program->getTitle() == $title);
@@ -58,8 +58,8 @@ class StudyProgramQuery
      */
     public function getAll(): array
     {
-	global $DIC;
-	    
+        global $DIC;
+
         static $cache = array();
         if (isset($cache[$this->config->getCourse()->getId()])) {
             return $cache[$this->config->getCourse()->getId()];
@@ -74,21 +74,21 @@ class StudyProgramQuery
                 $programs[] = new StudyProgram($id, $title);
             }
         } else {
-	    $CSplugin = \ilCustomUserFieldsHelper::getInstance()->getPluginForType(\ilCascadingSelectPlugin::CASCADING_TYPE_ID);
-            $settings = new \Leifos\CascadingSelect\Settings($DIC->database(),$CSplugin->getFactory());
+            $CSplugin = \ilCustomUserFieldsHelper::getInstance()->getPluginForType(\ilCascadingSelectPlugin::CASCADING_TYPE_ID);
+            $settings = new \Leifos\CascadingSelect\Settings($DIC->database(), $CSplugin->getFactory());
             $data = $settings->getJSON($this->config->get('udf_id_study_program'))->raw();
 
             $program_titles = array();
             // The study programs are options on the second level of all data available on the first level
             foreach ($data->options as $level1) {
-		// avoid error if level2 is empty. Use level1->name as fallback (functionality still to be tested)    
-		if (property_exists($level1,'options')) {    
+                // avoid error if level2 is empty. Use level1->name as fallback (functionality still to be tested)
+                if (property_exists($level1, 'options')) {
                     foreach ($level1->options as $level2) {
                         $program_titles[] = $level2->name;
                     }
-		} else {
-		    $program_titles[] = $level1->name;
-		}
+                } else {
+                    $program_titles[] = $level1->name;
+                }
             }
             foreach (array_unique($program_titles) as $id => $title) {
                 $programs[] = new StudyProgram($id, $title);
@@ -108,7 +108,7 @@ class StudyProgramQuery
     {
         $udf = \ilUserDefinedFields::_getInstance();
         $data = $udf->getDefinition($this->config->get('udf_id_study_program'));
-	    // type is hardcoded here, since CascadingSelect may be not installed
+        // type is hardcoded here, since CascadingSelect may be not installed
         return ((string) $data['field_type'] === "51");
     }
 }
