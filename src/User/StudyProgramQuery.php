@@ -6,6 +6,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 
 class StudyProgramQuery
 {
+    private const DEFAULT_STUDY_PROGRAM_TITLE = 'Allgemein';
     protected CourseConfigProvider $config;
     protected \ilSetting $udf_setting;
 
@@ -35,15 +36,13 @@ class StudyProgramQuery
         //13.04.2021 Modification DHBW from old master
         if ($this->isCascadingSelect()) {
             list($level1, $title, $_) = array_map('trim', explode("→", $title));
-            if ($title == '') {
+            if ($title == '' || $title == self::DEFAULT_STUDY_PROGRAM_TITLE) {
                 $title = $level1;
             }
         }
         $filtered = array_filter($this->getAll(), function ($study_program) use ($title) {
-            /** @var $study_program StudyProgram */
             return ($study_program->getTitle() == $title);
         });
-
         return count($filtered) ? array_pop($filtered) : null;
     }
 

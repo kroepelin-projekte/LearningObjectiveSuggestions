@@ -76,13 +76,11 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
     {
         switch ($a_component) {
             case "Services/AccessControl":
-                switch ($a_event) {
-                    case 'assignUser':
-                        $user = new User(new ilObjUser($a_parameter['usr_id']));
-                        if ($this->startCalculation($user)) {
-                            $this->sendSuggestions($user);
-                        }
-                        break;
+                if ($a_event == 'assignUser' && $a_parameter['type'] == 'crs') {
+                    $user = new User(new ilObjUser($a_parameter['usr_id']));
+                    if ($this->startCalculation($user)) {
+                        $this->sendSuggestions($user);
+                    }
                 }
                 break;
             case 'Modules/Course':

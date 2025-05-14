@@ -79,7 +79,7 @@ class CalculateScoresAndSuggestions
                 $objective_results[] = new LearningObjectiveResult($objective, $user);
             }
         }
-        if (empty($objectiveResults)) {
+        if (empty($objective_results)) {
             return false;
         }
 
