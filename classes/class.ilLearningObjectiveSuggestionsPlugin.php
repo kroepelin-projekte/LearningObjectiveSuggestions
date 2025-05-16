@@ -81,8 +81,8 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
                     $config = new ConfigProvider();
                     $ref_ids = $config->getCourseRefIds();
                     $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
-                    if (in_array(current($crs_ref_id), $ref_ids)) {
-                        $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
+                    $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
+                    if (in_array(current($crs_ref_id), $ref_ids) && !$course->getIsCronInactive()) {
                         $user = new User(new ilObjUser($a_parameter['usr_id']));
                         if ($this->startCalculation($course, $user)) {
                             $this->sendSuggestions($course, $user);
@@ -95,8 +95,8 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
                     $config = new ConfigProvider();
                     $ref_ids = $config->getCourseRefIds();
                     $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
-                    if (in_array(current($crs_ref_id), $ref_ids)) {
-                        $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
+                    $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
+                    if (in_array(current($crs_ref_id), $ref_ids) && !$course->getIsCronInactive()) {
                         $user = new User(new ilObjUser($a_parameter['usr_id']));
                         if ($this->startCalculation($course, $user)) {
                             $this->sendSuggestions($course, $user);
