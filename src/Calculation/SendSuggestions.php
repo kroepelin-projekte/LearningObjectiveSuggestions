@@ -37,15 +37,9 @@ class SendSuggestions
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
     }
 
-    public function run(User $user): void
+    public function run(LearningObjectiveCourse $course, User $user): void
     {
-        foreach ($this->config->getCourseRefIds() as $ref_id) {
-            if (!\ilObject::_exists($ref_id, true)) {
-                continue;
-            }
-            $course = new LearningObjectiveCourse(new \ilObjCourse($ref_id));
-            $this->runForCourse($course, $user);
-        }
+        $this->runForCourse($course, $user);
     }
 
     protected function runForCourse(LearningObjectiveCourse $course, User $user): void

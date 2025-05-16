@@ -12,6 +12,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Score\LearningObjectiveScore
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Calculation\SendSuggestions;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveCourse;
 
 /**
  * Class ilLearningObjectiveSuggestionsPlugin
@@ -77,47 +78,46 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
         switch ($a_component) {
             case "Services/AccessControl":
                 if ($a_event == 'assignUser' && $a_parameter['type'] == 'crs') {
-                    $user = new User(new ilObjUser($a_parameter['usr_id']));
-                    if ($this->startCalculation($user)) {
-                        $this->sendSuggestions($user);
+                    $config = new ConfigProvider();
+                    $ref_ids = $config->getCourseRefIds();
+                    $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
+                    if (in_array(current($crs_ref_id), $ref_ids)) {
+                        $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
+                        $user = new User(new ilObjUser($a_parameter['usr_id']));
+                        if ($this->startCalculation($course, $user)) {
+                            $this->sendSuggestions($course, $user);
+                        }
                     }
                 }
                 break;
             case 'Modules/Course':
-                switch ($a_event) {
-                    case 'participantHasPassedCourse':
+                if ($a_event == 'participantHasPassedCourse') {
+                    $config = new ConfigProvider();
+                    $ref_ids = $config->getCourseRefIds();
+                    $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
+                    if (in_array(current($crs_ref_id), $ref_ids)) {
+                        $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
                         $user = new User(new ilObjUser($a_parameter['usr_id']));
-                        if ($this->startCalculation($user)) {
-                            $this->sendSuggestions($user);
+                        if ($this->startCalculation($course, $user)) {
+                            $this->sendSuggestions($course, $user);
                         }
-                        break;
-                }
-                break;
-            case 'Services/Tracking':
-                switch ($a_event) {
-                    case 'updateStatus':
-                        $user = new User(new ilObjUser($a_parameter['usr_id']));
-                        // check status, old_status, obj_id und usr_id aus $a_parameter
-                        if ($this->startCalculation($user)) {
-                            $this->sendSuggestions($user);
-                        }
-                        break;
+                    }
                 }
                 break;
         }
     }
 
-    protected function startCalculation(User $user): bool
+    protected function startCalculation(LearningObjectiveCourse $course, User $user): bool
     {
         $calculation = new CalculateScoresAndSuggestions(
             $this->db,
             new ConfigProvider(),
             new Log()
         );
-        return $calculation->run($user);
+        return $calculation->run($course, $user);
     }
 
-    protected function sendSuggestions(User $user): void
+    protected function sendSuggestions(LearningObjectiveCourse $course, User $user): void
     {
         $send_suggestions = new SendSuggestions(
             $this->db,
@@ -125,6 +125,6 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
             new TwigParser(),
             new Log()
         );
-        $send_suggestions->run($user);
+        $send_suggestions->run($course, $user);
     }
 }

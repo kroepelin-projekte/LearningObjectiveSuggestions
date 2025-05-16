@@ -37,24 +37,15 @@ class CalculateScoresAndSuggestions
         $this->log = $log;
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
     }
-    public function run(User $user): bool
+    public function run(LearningObjectiveCourse $course, User $user): bool
     {
         $hasAtLeastOneUpdate = false;
 
-        foreach ($this->config->getCourseRefIds() as $ref_id) {
-
-            if (!\ilObject::_exists($ref_id, true)) {
-                continue;
-            }
-
-            $course = new LearningObjectiveCourse(new \ilObjCourse($ref_id));
-            if ($course->getIsCronInactive()) {
-                continue;
-            }
-            if ($this->runForUser($course, $user)) {
-                $hasAtLeastOneUpdate = true;
-            }
-
+        if ($course->getIsCronInactive()) {
+            return $hasAtLeastOneUpdate;
+        }
+        if ($this->runForUser($course, $user)) {
+            $hasAtLeastOneUpdate = true;
         }
 
         return $hasAtLeastOneUpdate;
@@ -102,8 +93,6 @@ class CalculateScoresAndSuggestions
 
                 $score->setScore($calculatedScore);
                 $score->save();
-
-                $atLeastOneActionDone = true;
             } catch (\Exception $e) {
                 $this->log->write("Exception when trying to calculate the score");
                 $this->log->write($e->getMessage());
