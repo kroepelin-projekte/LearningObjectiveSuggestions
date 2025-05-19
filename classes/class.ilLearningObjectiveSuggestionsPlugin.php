@@ -103,7 +103,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilCronHookPlugin
 
     protected function beforeUninstall(): bool
     {
-        $this->db->dropTable(LearningObjectiveScore::TABLE_NAME, false);
+        /*$this->db->dropTable(LearningObjectiveScore::TABLE_NAME, false);
         $this->db->dropTable(LearningObjectiveSuggestion::TABLE_NAME, false);
         $this->db->dropTable(CourseConfig::TABLE_NAME, false);
         $this->db->dropTable(Config::TABLE_NAME, false);
@@ -114,7 +114,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilCronHookPlugin
         }
         if (file_exists(ILIAS_DATA_DIR . "/learning-objective-suggestions.log")) {
             unlink(ILIAS_DATA_DIR . "/learning-objective-suggestions.log");
-        }
+        }*/
         return true;
     }
 
