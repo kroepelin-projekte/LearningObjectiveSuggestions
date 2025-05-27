@@ -13,6 +13,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjective
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Calculation\SendSuggestions;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveCourse;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 
 /**
  * Class ilLearningObjectiveSuggestionsPlugin
@@ -75,35 +76,33 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
 
     public function handleEvent(string $a_component, string $a_event, array $a_parameter): void
     {
-        switch ($a_component) {
-            case "Services/AccessControl":
-                if ($a_event == 'assignUser' && $a_parameter['type'] == 'crs') {
-                    $config = new ConfigProvider();
-                    $ref_ids = $config->getCourseRefIds();
-                    $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
-                    $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
-                    if (in_array(current($crs_ref_id), $ref_ids) && !$course->getIsCronInactive()) {
-                        $user = new User(new ilObjUser($a_parameter['usr_id']));
-                        if ($this->startCalculation($course, $user)) {
-                            $this->sendSuggestions($course, $user);
-                        }
+        if ($a_component == "Services/Tracking"
+            && $a_event == 'updateStatus'
+            && $a_parameter['old_status'] == \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM
+            && $a_parameter['status'] > \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM) {
+            global $DIC;
+            $already_calculated = false;
+            $config = new ConfigProvider();
+            $ref_ids = $config->getCourseRefIds();
+            $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
+            $parent = $DIC->repositoryTree()->getParentId(current($crs_ref_id));
+            $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
+            $crsconfig = new CourseConfigProvider($course);
+            $assign_role_config = json_decode($crsconfig->getRoleAssignmentConfig(), true);
+            $assigned_roles = $DIC->rbac()->review()->assignedRoles($a_parameter['usr_id']);
+            if (is_array($assign_role_config)) {
+                foreach ($assign_role_config as $config) {
+                    if (in_array($config['role'], $assigned_roles)) {
+                        $already_calculated = true;
                     }
                 }
-                break;
-            case 'Modules/Course':
-                if ($a_event == 'participantHasPassedCourse') {
-                    $config = new ConfigProvider();
-                    $ref_ids = $config->getCourseRefIds();
-                    $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
-                    $course = new LearningObjectiveCourse(new ilObjCourse($a_parameter['obj_id'], false));
-                    if (in_array(current($crs_ref_id), $ref_ids) && !$course->getIsCronInactive()) {
-                        $user = new User(new ilObjUser($a_parameter['usr_id']));
-                        if ($this->startCalculation($course, $user)) {
-                            $this->sendSuggestions($course, $user);
-                        }
-                    }
+            }
+            if (in_array($parent, $ref_ids) && !$course->getIsCronInactive() && !$already_calculated) {
+                $user = new User(new ilObjUser($a_parameter['usr_id']));
+                if ($this->startCalculation($course, $user)) {
+                    $this->sendSuggestions($course, $user);
                 }
-                break;
+            }
         }
     }
 
