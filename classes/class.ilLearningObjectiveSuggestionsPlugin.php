@@ -86,22 +86,24 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
             $ref_ids = $config->getCourseRefIds();
             $crs_ref_id = ilObject::_getAllReferences($a_parameter['obj_id']);
             $parent = $DIC->repositoryTree()->getParentId(current($crs_ref_id));
-            $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
-            $crsconfig = new CourseConfigProvider($course);
-            $assign_role_config = json_decode($crsconfig->getRoleAssignmentConfig(), true);
-            $assigned_roles = $DIC->rbac()->review()->assignedRoles($a_parameter['usr_id']);
-            if (is_array($assign_role_config)) {
-                foreach ($assign_role_config as $config) {
-                    if (in_array($config['role'], $assigned_roles)) {
-                        $already_calculated = true;
-                        break;
+            if (ilObject::_lookupType($parent, true) === 'crs') {
+                $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
+                $crsconfig = new CourseConfigProvider($course);
+                $assign_role_config = json_decode($crsconfig->getRoleAssignmentConfig(), true);
+                $assigned_roles = $DIC->rbac()->review()->assignedRoles($a_parameter['usr_id']);
+                if (is_array($assign_role_config)) {
+                    foreach ($assign_role_config as $config) {
+                        if (in_array($config['role'], $assigned_roles)) {
+                            $already_calculated = true;
+                            break;
+                        }
                     }
                 }
-            }
-            if (in_array($parent, $ref_ids) && !$course->getIsCronInactive() && !$already_calculated) {
-                $user = new User(new ilObjUser($a_parameter['usr_id']));
-                if ($this->startCalculation($course, $user)) {
-                    $this->sendSuggestions($course, $user);
+                if (in_array($parent, $ref_ids) && !$course->getIsCronInactive() && !$already_calculated) {
+                    $user = new User(new ilObjUser($a_parameter['usr_id']));
+                    if ($this->startCalculation($course, $user)) {
+                        $this->sendSuggestions($course, $user);
+                    }
                 }
             }
         }
