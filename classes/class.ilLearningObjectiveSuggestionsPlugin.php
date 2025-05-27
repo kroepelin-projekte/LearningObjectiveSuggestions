@@ -94,6 +94,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
                 foreach ($assign_role_config as $config) {
                     if (in_array($config['role'], $assigned_roles)) {
                         $already_calculated = true;
+                        break;
                     }
                 }
             }
