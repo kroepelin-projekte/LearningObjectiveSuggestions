@@ -165,7 +165,7 @@ class CalculateScoresAndSuggestions
             try {
                 $suggestions = LearningObjectiveSuggestion::where(['course_obj_id' => $score->getCourseObjId(), 'objective_id' => $score->getObjectiveId(), 'user_id' => $score->getUserId()])->get();
                 if (count($suggestions) > 0) {
-                    $suggestion = array_values($scores)[0];
+                    $suggestion = array_values($suggestions)[0];
                 } else {
                     $suggestion = new LearningObjectiveSuggestion();
                 }

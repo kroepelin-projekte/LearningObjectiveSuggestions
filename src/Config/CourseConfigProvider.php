@@ -94,6 +94,6 @@ class CourseConfigProvider
     }
     public function getRoleAssignmentConfig(): string
     {
-        return $this->get('role_assignment_config');
+        return $this->get('role_assignment_config') ?? '';
     }
 }
