@@ -88,9 +88,10 @@ class CourseConfigProvider
     {
         return (string) $this->get('email_body');
     }
-    public function getIsCronInactive(): bool
+    public function getIsCalculationInactive(): bool
     {
-        return (bool) $this->get('is_cron_inactive');
+        //TODO change the is_cron_inactive table to is_calculation_inactive
+        return (bool) $this->get('is_calculation_inactive');
     }
     public function getRoleAssignmentConfig(): string
     {

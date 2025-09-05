@@ -30,10 +30,10 @@ class LearningObjectiveCourse
     {
         return $this->course->getRefId();
     }
-    public function getIsCronInactive(): bool
+    public function getIsCalculationInactive(): bool
     {
         $config = new CourseConfigProvider($this);
-        return $config->getIsCronInactive();
+        return $config->getIsCalculationInactive();
     }
     public function getLink(): string
     {

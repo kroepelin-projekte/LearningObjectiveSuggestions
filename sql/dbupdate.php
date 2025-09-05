@@ -27,7 +27,7 @@ foreach (SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObje
     /**
      * @@var LearningObjectiveSuggestion $sug
      */
-    $sug->setIsCronActive(1);
+    $sug->setIsCalculationActive(1);
     $sug->save();
 }
 ?>
@@ -57,4 +57,14 @@ $DIC->database()->query("DELETE t
 
 $DIC->database()->query("ALTER TABLE alo_score ADD UNIQUE INDEX (user_Id, course_obj_id, objective_id)");
 $DIC->database()->query("ALTER TABLE alo_suggestion ADD UNIQUE INDEX (user_Id, course_obj_id, objective_id)");
+?>
+
+<#6>
+<?php
+global $DIC;
+
+if ($DIC->database()->tableExists('alo_suggestion') && $DIC->database()->tableColumnExists('alo_suggestion', 'is_cron_active')) {
+    $DIC->database()->renameTableColumn('alo_suggestion', 'is_cron_active', 'is_calculation_active');
+}
+
 ?>

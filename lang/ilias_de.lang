@@ -54,13 +54,14 @@ udf_study_program#:#UDF Studienprogramm
 udf_study_program_info#:#UDF Dropdown Feld, welches die Studiengänge enthält
 weight_fine#:#Feingewichte
 weight_rough#:#Grobgewichte
-cron#:#Cron Aktiv
+calculation#:#Calculation Aktiv
 delete_learning_objective_course#:#Löschen
 confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht! Bitte laden Sie sich vorher noch die Empfehlungen herunter.
 download_suggestions#:#Empfehlungen herunterladen
 cancel#:#Abbrechen
 course_removed#:#Lernzielorientierter Kurs wurde entfernt.
-deactivate_cron#:#Cron deaktivieren
-activate_cron#:#Cron aktivieren
+deactivate_calculation#:#Calculation deaktivieren
+activate_calculation#:#Calculation aktivieren
 role_assignment#:#Rollenzuweisung
 role_assignment_config#:#Rollenzuweisung Konfiguration
+calculation#:#Berechnung

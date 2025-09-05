@@ -102,7 +102,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @con_is_notnull  true
      * @db_length       1
      */
-    protected int $is_cron_active = 1;
+    protected int $is_calculation_active = 1;
     public function create(): void
     {
         global $DIC;
@@ -122,8 +122,8 @@ class LearningObjectiveSuggestion extends \ActiveRecord
         $user = new User($ilUser);
 
         $learning_objective_suggestions = new LearningObjectiveSuggestions($course, $user);
-        if ($learning_objective_suggestions->isCronInactive()) {
-            $this->setIsCronActive(0);
+        if ($learning_objective_suggestions->isCalculationInactive()) {
+            $this->setIsCalculationActive(0);
         }
 
         parent::update();
@@ -188,12 +188,12 @@ class LearningObjectiveSuggestion extends \ActiveRecord
     {
         $this->objective_id = $objective_id;
     }
-    public function getIsCronActive(): int
+    public function getIsCalculationActive(): int
     {
-        return $this->is_cron_active;
+        return $this->is_calculation_active;
     }
-    public function setIsCronActive(int $is_cron_active): void
+    public function setIsCalculationActive(int $is_calculation_active): void
     {
-        $this->is_cron_active = $is_cron_active;
+        $this->is_calculation_active = $is_calculation_active;
     }
 }

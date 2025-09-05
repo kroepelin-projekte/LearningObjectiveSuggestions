@@ -31,36 +31,36 @@ class LearningObjectiveSuggestions
             'user_id' => $this->user->getId(),
             'course_obj_id' => $this->course->getId()))->get();
     }
-    public function isCronInactive(): bool
+    public function isCalculationInactive(): bool
     {
         return LearningObjectiveSuggestion::where(array(
             'user_id' => $this->user->getId(),
             'course_obj_id' => $this->course->getId(),
-            'is_cron_active' => 0))->hasSets();
+            'is_calculation_active' => 0))->hasSets();
     }
-    public function setCronActive(): void
+    public function setCalculationActive(): void
     {
         foreach ($this->getSuggestions() as $suggestion) {
-            $suggestion->setIsCronActive(1);
+            $suggestion->setIsCalculationActive(1);
             $suggestion->store();
         }
     }
-    public function setCronInactive(): void
+    public function setCalculationInactive(): void
     {
         foreach ($this->getSuggestions() as $suggestion) {
-            $suggestion->setIsCronActive(0);
+            $suggestion->setIsCalculationActive(0);
             $suggestion->store();
         }
     }
     /**
-     * Checks if cron is set to inactve for the given course/user pair
+     * Checks if calculation is set to inactive for the given course/user pair
      */
-    protected function isCronInactiveForUserSuggestions(): bool
+    protected function isCalculationInactiveForUserSuggestions(): bool
     {
         return LearningObjectiveSuggestion::where(array(
             'user_id' => $this->user->getId(),
             'course_obj_id' => $this->course->getILIASCourse()->getId(),
-            'is_cron_active' => 0
+            'is_calculation_active' => 0
         ))->hasSets();
     }
 }

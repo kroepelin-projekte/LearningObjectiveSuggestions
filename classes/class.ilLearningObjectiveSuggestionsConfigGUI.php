@@ -31,8 +31,8 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
     public const CMD_SAVE = "save";
     public const CMD_SAVE_COURSE = "saveCourse";
     public const CMD_SAVE_NOTIFICATIONS = "saveNotifications";
-    public const CMD_DEACTIVATE_CRON = "deactivateCron";
-    public const CMD_ACTIVATE_CRON = "activateCron";
+    public const CMD_DEACTIVATE_CALCULATION = "deactivateCalculation";
+    public const CMD_ACTIVATE_CALCULATION = "activateCalculation";
     public const TAB_CONFIGURE_COURSE = "configureCourse";
     public const TAB_CONFIGURE_NOTIFICATIONS = "configureNotifications";
     protected ilTemplate|ilGlobalTemplateInterface $tpl;
@@ -348,18 +348,18 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $form->setValuesByPost();
         $this->tpl->setContent($form->getHTML());
     }
-    protected function activateCron(): void
+    protected function activateCalculation(): void
     {
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $config = new CourseConfigProvider($course);
-        $config->set('is_cron_inactive', 0);
+        $config->set('is_calculation_inactive', 0);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
     }
-    protected function deactivateCron(): void
+    protected function deactivateCalculation(): void
     {
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $config = new CourseConfigProvider($course);
-        $config->set('is_cron_inactive', 1);
+        $config->set('is_calculation_inactive', 1);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
     }
     protected function addTabs(string $active = ''): void

@@ -41,7 +41,7 @@ class CalculateScoresAndSuggestions
     {
         $hasAtLeastOneUpdate = false;
 
-        if ($course->getIsCronInactive()) {
+        if ($course->getIsCalculationInactive()) {
             return $hasAtLeastOneUpdate;
         }
         if ($this->runForUser($course, $user)) {
@@ -56,7 +56,7 @@ class CalculateScoresAndSuggestions
         $study_program_query = new StudyProgramQuery($config);
         $learning_objective_query = new LearningObjectiveQuery($config);
 
-        if ($this->isCronInactiveForUserSuggestions($course, $user)) {
+        if ($this->isCalculationInactiveForUserSuggestions($course, $user)) {
             return false;
         }
 
@@ -138,14 +138,14 @@ class CalculateScoresAndSuggestions
     }
 
     /**
-     * Checks if cron is setz to inactve for the given course/user pair
+     * Checks if calculation is setz to inactve for the given course/user pair
      */
-    protected function isCronInactiveForUserSuggestions(LearningObjectiveCourse $course, User $user): bool
+    protected function isCalculationInactiveForUserSuggestions(LearningObjectiveCourse $course, User $user): bool
     {
         return LearningObjectiveSuggestion::where(array(
             'user_id' => $user->getId(),
             'course_obj_id' => $course->getId(),
-            'is_cron_active' => 0
+            'is_calculation_active' => 0
         ))->hasSets();
     }
 

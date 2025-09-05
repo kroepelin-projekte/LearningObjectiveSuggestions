@@ -31,7 +31,7 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
             $data[] = array(
                 'ref_id' => $course->getRefId(),
                 'title' => $course->getTitle(),
-                'is_cron_active' => !$course->getIsCronInactive()
+                'is_calculation_active' => !$course->getIsCalculationInactive()
             );
         }
         $this->setData($data);
@@ -56,7 +56,7 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
 
             $value = '&nbsp;';
             switch ($column) {
-                case 'is_cron_active':
+                case 'is_calculation_active':
                     $factory = $DIC->ui()->factory();
                     if ($a_set[$column] === true) {
                         $value = "active";
@@ -82,12 +82,12 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
 
 
 
-        switch ($a_set['is_cron_active']) {
+        switch ($a_set['is_calculation_active']) {
             case 1:
-                $list->addItem($this->pl->txt('deactivate_cron'), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_DEACTIVATE_CRON));
+                $list->addItem($this->pl->txt('deactivate_calculation'), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_DEACTIVATE_CALCULATION));
                 break;
             default:
-                $list->addItem($this->pl->txt('activate_cron'), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_ACTIVATE_CRON));
+                $list->addItem($this->pl->txt('activate_calculation'), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_ACTIVATE_CALCULATION));
                 break;
         }
 
@@ -103,7 +103,7 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
         return array(
             'ref_id' => array( 'txt' => $this->pl->txt("ref_id"), 'default' => true ),
             'title' => array( 'txt' => $this->pl->txt("title"), 'default' => true ),
-            'is_cron_active' => array( 'txt' => $this->pl->txt("cron"), 'default' => true )
+            'is_calculation_active' => array( 'txt' => $this->pl->txt("calculation"), 'default' => true )
         );
     }
 }

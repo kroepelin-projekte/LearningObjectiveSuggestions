@@ -97,7 +97,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
             }
             if ($parent_found && ilObject::_lookupType($parent, true) === 'crs') {
                 $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
-                if (!$course->getIsCronInactive()) {
+                if (!$course->getIsCalculationInactive()) {
                     $user = new User(new ilObjUser($a_parameter['usr_id']));
                     if ($this->startCalculation($course, $user)) {
                         $this->sendSuggestions($course, $user);

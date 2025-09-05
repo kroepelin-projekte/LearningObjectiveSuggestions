@@ -92,7 +92,7 @@ class SendSuggestions
 
     public static function getTestUserResult(int $user_id, int $crs_ref_id): float
     {
-        // Fix missing tpl ui in cron context used in test question object constructor
+        // Fix missing tpl ui in calculation context used in test question object constructor
         global $DIC;
         if (!$DIC->offsetExists("tpl")) {
             $DIC["tpl"] = $GLOBALS["tpl"] = new ilTemplate("tpl.main_menu.html", true, true, "Services/MainMenu");
@@ -215,7 +215,7 @@ class SendSuggestions
             . Notification::TABLE_NAME . '.user_id = ' . LearningObjectiveSuggestion::TABLE_NAME . '.user_id)
 				WHERE 
 					' . LearningObjectiveSuggestion::TABLE_NAME . '.course_obj_id = ' . $this->db->quote($course->getId(), 'integer') . ' 
-					AND ' . LearningObjectiveSuggestion::TABLE_NAME . '.is_cron_active = 1 ' . '
+					AND ' . LearningObjectiveSuggestion::TABLE_NAME . '.is_calculation_active = 1 ' . '
                     AND ' . LearningObjectiveSuggestion::TABLE_NAME . '.user_id = ' . $this->db->quote($user->getId(), 'integer') . '
                 GROUP BY ' . LearningObjectiveSuggestion::TABLE_NAME . '.user_id';
 
