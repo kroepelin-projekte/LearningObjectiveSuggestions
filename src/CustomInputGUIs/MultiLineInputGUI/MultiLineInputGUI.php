@@ -688,7 +688,7 @@ class MultiLineInputGUI extends ilFormPropertyGUI implements ilTableFilterItem, 
      *
      * @deprecated
      */
-    public function setMulti(/*bool*/ $a_multi, /*bool*/ $a_sortable = false, /*bool*/ $a_addremove = true)/*: void*/
+    public function setMulti(bool $a_multi, bool $a_sortable = false, bool $a_addremove = true): void
     {
         $this->multi = $a_multi;
     }
