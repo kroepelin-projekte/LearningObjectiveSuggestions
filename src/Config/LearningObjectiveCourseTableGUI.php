@@ -45,6 +45,11 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
         }
         $this->addColumn($this->pl->txt("actions"));
     }
+
+    /**
+     * @throws \ilTemplateException
+     * @throws \ilCtrlException
+     */
     protected function fillRow(array $a_set): void
     {
         global $DIC;
@@ -86,7 +91,7 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
         $this->tpl->setCurrentBlock('td');
 
         $this->tpl->setVariable('LINK_CONFIGURE_COURSE_TEXT', $this->pl->txt('configurate'));
-        $this->tpl->setVariable('LINK_CONFIGURE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE));
+        $this->tpl->setVariable('LINK_CONFIGURE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE) . '&course_ref_id=' . $a_set['ref_id']);
         $this->tpl->setVariable('LINK_DELETE_COURSE_TEXT', $this->pl->txt('delete_learning_objective_course'));
         $this->tpl->setVariable('LINK_DELETE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIRM_DELETE_COURSE_CONFIG));
         $this->tpl->setVariable('LINK_TOGGLE_STATUS_COURSE_TEXT', $statusText);

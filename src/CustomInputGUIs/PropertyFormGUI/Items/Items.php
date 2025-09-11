@@ -21,6 +21,8 @@ use TypeError;
 
 final class Items
 {
+    public const PLUGIN_DIRECTORY = 'Customizing/global/plugins/Services/EventHandling/EventHook/LearningObjectiveSuggestions';
+
     protected static bool $init = false;
 
     private function __construct()
@@ -155,11 +157,7 @@ final class Items
     {
         if (self::$init === false) {
             self::$init = true;
-
-            $dir = __DIR__;
-            $dir = "./" . substr($dir, strpos($dir, "/Customizing/") + 1);
-
-            $ui->mainTemplate()->addCss($dir . "/css/input_gui_input.css");
+            $ui->mainTemplate()->addCss(self::PLUGIN_DIRECTORY . '/src/PropertyFormGUI/Items/css/input_gui_input.css');
         }
     }
 
@@ -172,7 +170,14 @@ final class Items
         global $DIC;
         self::init($DIC->ui());
 
-        $input_tpl = new ilTemplate(__DIR__ . "/templates/input_gui_input.html", true, true);
+        $input_tpl = new ilTemplate(
+            'input_gui_input.html',
+            true,
+            true,
+            'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/PropertyFormGUI/Items/',
+            \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+            true
+        );
 
         $input_tpl->setCurrentBlock("input");
 
@@ -180,7 +185,15 @@ final class Items
             $input_tpl->setVariable("TITLE", htmlspecialchars($input->getTitle()));
 
             if ($input->getRequired()) {
-                $requiredInputGUI = new ilTemplate(__DIR__ . "/templates/input_gui_input_required.html", true, false);
+                $requiredInputGUI = new ilTemplate(
+                    'input_gui_input_required.html',
+                    true,
+                    false,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/PropertyFormGUI/Items/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
+
                 $input_tpl->setVariable("REQUIRED", $requiredInputGUI->get());
             }
 
@@ -191,7 +204,14 @@ final class Items
             $input_tpl->setVariable("INPUT", $input_html);
 
             if ($input->getInfo()) {
-                $input_info_tpl = new ilTemplate(__DIR__ . "/templates/input_gui_input_info.html", true, true);
+                $input_info_tpl = new ilTemplate(
+                    'input_gui_input_info.html',
+                    true,
+                    true,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/PropertyFormGUI/Items/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
 
                 $input_info_tpl->setVariable("INFO", htmlspecialchars($input->getInfo()));
 
@@ -199,7 +219,15 @@ final class Items
             }
 
             if ($input->getAlert()) {
-                $input_alert_tpl = new ilTemplate(__DIR__ . "/templates/input_gui_input_alert.html", true, true);
+                $input_alert_tpl = new ilTemplate(
+                    'input_gui_input_alert.html',
+                    true,
+                    true,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/PropertyFormGUI/Items/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
+
                 $input_alert_tpl->setVariable("IMG",
                     self::output()->getHTML(self::dic()->ui()->factory()->image()->standard(ilUtil::getImagePath("icon_alert.svg"), self::dic()->language()->txt("alert"))));
                 $input_alert_tpl->setVariable("TXT", htmlspecialchars($input->getAlert()));

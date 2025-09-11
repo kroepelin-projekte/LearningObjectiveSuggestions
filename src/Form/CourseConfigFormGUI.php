@@ -38,6 +38,7 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         foreach ($definitions as $field_id => $data) {
             $options[$field_id] = $data['field_name'];
         }
+
         $udf = new \ilSelectInputGUI($this->pl->txt("udf_study_program"), 'udf_id_study_program');
         $udf->setInfo($this->pl->txt("udf_study_program_info"));
         $udf->setOptions($options);
@@ -169,6 +170,7 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         $item->setRequired(true);
 
         $jsonString = $this->config->get($item->getPostVar()) ?: '[]';
+
         $item->setValue((array) json_decode($jsonString, true));
         $this->addItem($item);
         $item->setRequired(false);

@@ -13,6 +13,8 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\PropertyForm
 
 class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterItem, ilToolbarItem
 {
+    public const PLUGIN_DIRECTORY = 'Customizing/global/plugins/Services/EventHandling/EventHook/LearningObjectiveSuggestions';
+
     const SHOW_INPUT_LABEL_ALWAYS = 3;
     const SHOW_INPUT_LABEL_NONE = 1;
     const SHOW_INPUT_LABEL_ONCE = 2;
@@ -46,12 +48,8 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         if (self::$init === false) {
             self::$init = true;
 
-            $dir = __DIR__;
-            $dir = "./" . substr($dir, strpos($dir, "/Customizing/") + 1);
-
-            $ui->mainTemplate()->addCss($dir . "/css/multi_line_new_input_gui.css");
-
-            $ui->mainTemplate()->addJavaScript($dir . "/js/multi_line_new_input_gui.min.js");
+            $ui->mainTemplate()->addCss(self::PLUGIN_DIRECTORY  . '/src/CustomInputGUIs/MultiLineNewInputGUI/css/multi_line_new_input_gui.css');
+            $ui->mainTemplate()->addJavaScript(self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/js/multi_line_new_input_gui.min.js');
         }
     }
 
@@ -209,7 +207,14 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
     {
         $counter = ++self::$counter;
 
-        $tpl = new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui.html", true, true);
+        $tpl = new ilTemplate(
+            'multi_line_new_input_gui.html',
+            true,
+            true,
+            'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+            \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+            true
+        );
 
         $tpl->setVariable("COUNTER", htmlspecialchars($counter));
 
@@ -222,7 +227,15 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
             $tpl->setCurrentBlock("add_first_line");
 
             if (!empty($this->getInputs())) {
-                $hiddenInputGUI= new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui_hide.html", false, false);
+                $hiddenInputGUI = new ilTemplate(
+                    'multi_line_new_input_gui.html',
+                    false,
+                    false,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
+
                 $tpl->setVariable("HIDE_ADD_FIRST_LINE", $hiddenInputGUI->get());
             }
 
@@ -237,24 +250,54 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
 
         foreach ($this->getInputs() as $i => $inputs) {
             if ($remove_first_line) {
-                $hiddenInputGUI = new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui_hide.html", false, false);
+                $hiddenInputGUI = new ilTemplate(
+                    'multi_line_new_input_gui_hide.html',
+                    false,
+                    false,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
+
                 $tpl->setVariable("HIDE_LINE", $hiddenInputGUI->get());
             }
 
             $tpl->setVariable("INPUTS", Items::renderInputs($inputs));
 
             if ($this->isShowSort()) {
-                $sort_tpl = new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui_sort.html", true, true);
+                $sort_tpl = new ilTemplate(
+                    'multi_line_new_input_gui_sort.html',
+                    true,
+                    true,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
 
                 $sort_tpl->setVariable("UP", $this->ui->renderer()->render($this->glyph_factory->sortAscending()));
                 if ($i === 0) {
-                    $hiddenInputGUI = new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui_hide.html", false, false);
+                    $hiddenInputGUI = new ilTemplate(
+                        'multi_line_new_input_gui_hide.html',
+                        false,
+                        false,
+                        'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+                        \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                        true
+                    );
+
                     $sort_tpl->setVariable("HIDE_UP", $hiddenInputGUI->get());
                 }
 
                 $sort_tpl->setVariable("DOWN", $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->sortDescending()));
                 if ($i === (count($this->getInputs()) - 1)) {
-                    $hiddenInputGUI = new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui_hide.html", false, false);
+                    $hiddenInputGUI = new ilTemplate(
+                        'multi_line_new_input_gui_hide.html',
+                        false,
+                        false,
+                        'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+                        \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                        true
+                    );
                     $sort_tpl->setVariable("HIDE_DOWN", $hiddenInputGUI->get());
                 }
 
@@ -270,7 +313,14 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
 
             $tpl->setVariable("REMOVE", $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->remove()));
             if ($this->getRequired() && count($this->getInputs()) < 2) {
-                $hiddenInputGUI = new ilTemplate(__DIR__ . "/templates/multi_line_new_input_gui_hide.html", false, false);
+                $hiddenInputGUI = new ilTemplate(
+                    'multi_line_new_input_gui_hide.html',
+                    false,
+                    false,
+                    'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
+                    \ilGlobalTemplateInterface::DEFAULT_BLOCK,
+                    true
+                );
                 $tpl->setVariable("HIDE_REMOVE", $hiddenInputGUI->get());
             }
 

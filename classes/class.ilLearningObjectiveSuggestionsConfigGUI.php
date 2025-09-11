@@ -77,6 +77,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $this->initCourseHeader($course);
         $config = new CourseConfigProvider($course);
+
         $form = new CourseConfigFormGUI($config, new LearningObjectiveQuery($config), new StudyProgramQuery($config));
         $form->setFormAction($this->ctrl->getFormAction($this));
         $this->tpl->setContent($form->getHTML());
