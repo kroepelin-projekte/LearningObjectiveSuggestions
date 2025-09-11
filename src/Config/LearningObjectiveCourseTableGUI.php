@@ -73,29 +73,25 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
             $this->tpl->setVariable('VALUE', $value ? $value : '&nbsp;');
             $this->tpl->parseCurrentBlock();
         }
-        $list = new \ilAdvancedSelectionListGUI();
-        static $id = 0;
-        $list->setId(++$id);
+
         $this->ctrl->setParameter($this->parent_obj, 'course_ref_id', $a_set['ref_id']);
-        $list->addItem($this->pl->txt("configurate"), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE));
-        $list->addItem($this->pl->txt("delete_learning_objective_course"), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIRM_DELETE_COURSE_CONFIG));
-
-
-
-        switch ($a_set['is_calculation_active']) {
-            case 1:
-                $list->addItem($this->pl->txt('deactivate_calculation'), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_DEACTIVATE_CALCULATION));
-                break;
-            default:
-                $list->addItem($this->pl->txt('activate_calculation'), '', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_ACTIVATE_CALCULATION));
-                break;
+        $status = $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_ACTIVATE_CALCULATION);
+        $statusText = $this->pl->txt('activate_calculation');
+        if($a_set['is_calculation_active']) {
+            $status = $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_DEACTIVATE_CALCULATION);
+            $statusText = $this->pl->txt('deactivate_calculation');
         }
 
-
         $this->ctrl->clearParameters($this->parent_obj);
-        $list->setListTitle($this->pl->txt("actions"));
         $this->tpl->setCurrentBlock('td');
-        $this->tpl->setVariable('VALUE', $list->getHTML());
+
+        $this->tpl->setVariable('LINK_CONFIGURE_COURSE_TEXT', $this->pl->txt('configurate'));
+        $this->tpl->setVariable('LINK_CONFIGURE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE));
+        $this->tpl->setVariable('LINK_DELETE_COURSE_TEXT', $this->pl->txt('delete_learning_objective_course'));
+        $this->tpl->setVariable('LINK_DELETE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIRM_DELETE_COURSE_CONFIG));
+        $this->tpl->setVariable('LINK_TOGGLE_STATUS_COURSE_TEXT', $statusText);
+        $this->tpl->setVariable('LINK_TOGGLE_STATUS_COURSE', $status);
+
         $this->tpl->parseCurrentBlock();
     }
     public function getSelectableColumns(): array
