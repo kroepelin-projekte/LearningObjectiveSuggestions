@@ -228,7 +228,7 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
 
             if (!empty($this->getInputs())) {
                 $hiddenInputGUI = new ilTemplate(
-                    'multi_line_new_input_gui.html',
+                    'multi_line_new_input_gui_hide.html',
                     false,
                     false,
                     'public/' . self::PLUGIN_DIRECTORY . '/src/CustomInputGUIs/MultiLineNewInputGUI/',
