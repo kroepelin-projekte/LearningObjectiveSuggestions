@@ -76,11 +76,12 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
 
     public function handleEvent(string $a_component, string $a_event, array $a_parameter): void
     {
-        if ($a_component == "Services/Tracking"
+        if ($a_component == "components/ILIAS/Tracking"
             && $a_event == 'updateStatus'
             && $a_parameter['old_status'] == \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM
             && $a_parameter['status'] > \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM) {
             global $DIC;
+
             $config = new ConfigProvider();
 
             $ref_ids = $config->getCourseRefIds();
