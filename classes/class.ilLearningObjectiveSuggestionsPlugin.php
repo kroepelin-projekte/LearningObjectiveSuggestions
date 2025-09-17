@@ -23,10 +23,30 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
 {
     public const PLUGIN_ID = "dhbwautolo";
+
     public const PLUGIN_NAME = "LearningObjectiveSuggestions";
+
     protected static ?ilLearningObjectiveSuggestionsPlugin $instance = null;
+
     protected ilDBInterface $db;
 
+    /**
+     * @param ilDBInterface              $db
+     * @param ilComponentRepositoryWrite $component_repository
+     * @param string                     $id
+     */
+    public function __construct(
+        ilDBInterface $db,
+        ilComponentRepositoryWrite $component_repository,
+        string $id
+    ) {
+        parent::__construct($db, $component_repository, $id);
+        $this->db = $db;
+    }
+
+    /**
+     * @return ilLearningObjectiveSuggestionsPlugin
+     */
     public static function getInstance(): ilLearningObjectiveSuggestionsPlugin
     {
         if (static::$instance === null) {
@@ -43,20 +63,17 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
         return static::$instance;
     }
 
-    public function __construct(
-        ilDBInterface $db,
-        ilComponentRepositoryWrite $component_repository,
-        string $id
-    ) {
-        parent::__construct($db, $component_repository, $id);
-        $this->db = $db;
-    }
-
+    /**
+     * @return string
+     */
     public function getPluginName(): string
     {
         return self::PLUGIN_NAME;
     }
 
+    /**
+     * @return bool
+     */
     protected function beforeUninstall(): bool
     {
         $this->db->dropTable(LearningObjectiveScore::TABLE_NAME, false);
@@ -74,12 +91,21 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
         return true;
     }
 
+    /**
+     * @param string $a_component
+     * @param string $a_event
+     * @param array  $a_parameter
+     * @return void
+     */
     public function handleEvent(string $a_component, string $a_event, array $a_parameter): void
     {
-        if ($a_component == "components/ILIAS/Tracking"
+        if (
+            $a_component == "components/ILIAS/Tracking"
             && $a_event == 'updateStatus'
             && $a_parameter['old_status'] == \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM
-            && $a_parameter['status'] > \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM) {
+            && $a_parameter['status'] > \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM
+        ) {
+
             global $DIC;
 
             $config = new ConfigProvider();
@@ -108,6 +134,11 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
         }
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return bool
+     */
     protected function startCalculation(LearningObjectiveCourse $course, User $user): bool
     {
         $calculation = new CalculateScoresAndSuggestions(
@@ -118,6 +149,11 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
         return $calculation->run($course, $user);
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return void
+     */
     protected function sendSuggestions(LearningObjectiveCourse $course, User $user): void
     {
         $send_suggestions = new SendSuggestions(
