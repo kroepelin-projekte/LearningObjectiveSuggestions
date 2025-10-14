@@ -64,3 +64,5 @@ deactivate_cron#:#Deactivate Cron
 activate_cron#:#Activate Cron
 role_assignment#:#Role Assignment
 role_assignment_config#:#Role Assignment configuration
+learning_suggestion_generate#:#Learning Suggestion Generate
+learning_suggestions_generated#:#Learning Suggestion Generated
