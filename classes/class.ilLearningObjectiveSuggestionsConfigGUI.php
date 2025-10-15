@@ -12,6 +12,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Score\LearningObjectiveScore;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
 
 /**
  * Class ilLearningObjectiveSuggestionsConfigGUI
@@ -331,6 +332,16 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
             $activeParticipantsList = $test->getActiveParticipantList();
             $userIds = $activeParticipantsList->getAllUserIds();
             $testRefIds = ilObject::_getAllReferences($test->getId());
+
+            $learningObjectiveSuggestion = new LearningObjectiveSuggestion();
+            foreach ($userIds as $key => $userId) {
+                $learningSuggestionExists = $learningObjectiveSuggestion->suggestionExists($userId, $objId);
+
+                if ($learningSuggestionExists) {
+                    unset($userIds[$key]);
+                }
+            }
+            $userIds = array_values($userIds);
 
             $parent_found = false;
             $parent = 0;

@@ -196,4 +196,25 @@ class LearningObjectiveSuggestion extends \ActiveRecord
     {
         $this->is_cron_active = $is_cron_active;
     }
+
+    /**
+     * @param int $userId
+     * @param int $courseId
+     * @return bool
+     */
+    public function suggestionExists(
+        int $userId,
+        int $courseId
+    ): bool {
+        $suggestions = LearningObjectiveSuggestion::where(array(
+            'user_id' => $userId,
+            'course_obj_id' => $courseId
+            )
+        );
+
+        if ($suggestions->count() > 0) {
+            return true;
+        }
+        return false;
+    }
 }
