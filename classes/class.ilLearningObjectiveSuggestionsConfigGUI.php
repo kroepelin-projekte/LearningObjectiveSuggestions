@@ -330,7 +330,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
             $initialTestRefId = $settings->getInitialTest();
             $test = new ilObjTest($initialTestRefId, true);
             $activeParticipantsList = $test->getActiveParticipantList();
-            $userIds = $activeParticipantsList->getAllUserIds();
+            $userIds = $this->removeInactiveUsers($activeParticipantsList->getAllUserIds());
             $testRefIds = ilObject::_getAllReferences($test->getId());
 
             $learningObjectiveSuggestion = new LearningObjectiveSuggestion();
@@ -369,6 +369,20 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
 
         $this->tpl->setOnScreenMessage('success', $this->pl->txt("learning_suggestions_generated"), true);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
+    }
+
+    /**
+     * @param array $userIds
+     * @return array
+     */
+    private function removeInactiveUsers(array $userIds): array
+    {
+        foreach ($userIds as $key => $userId) {
+            if (!ilObjUser::_lookupActive($userId)) {
+                unset($userIds[$key]);
+            }
+        }
+        return array_values($userIds);
     }
 
     protected function saveCourse(): void
