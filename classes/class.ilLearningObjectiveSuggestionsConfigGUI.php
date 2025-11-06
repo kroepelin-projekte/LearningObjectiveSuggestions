@@ -10,6 +10,8 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\LearningObjectiveCour
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
 
 /**
  * Class ilLearningObjectiveSuggestionsConfigGUI
@@ -19,6 +21,9 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
 {
     public const CMD_ADD_COURSE = "addCourse";
+
+    public const CMD_LEARNING_SUGGESTIONS_GENERATE = "learningSuggestionsGenerate";
+
     public const CMD_CANCEL = "cancel";
     public const CMD_CONFIGURE = "configure";
     public const CMD_CONFIGURE_COURSE = "configureCourse";
@@ -59,12 +64,22 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $this->ctrl->saveParameter($this, 'course_ref_id');
         $this->$cmd();
     }
+
+    /**
+     * @throws ilCtrlException
+     */
     protected function configure(): void
     {
         $button = ilLinkButton::getInstance();
         $button->setCaption($this->pl->txt("add_course"), false);
         $button->setUrl($this->ctrl->getLinkTarget($this, self::CMD_ADD_COURSE));
         $this->toolbar->addButtonInstance($button);
+
+        $buttonLearningSuggestionGenerate = ilLinkButton::getInstance();
+        $buttonLearningSuggestionGenerate->setCaption($this->pl->txt('learning_suggestion_generate'), false);
+        $buttonLearningSuggestionGenerate->setUrl($this->ctrl->getLinkTarget($this, self::CMD_LEARNING_SUGGESTIONS_GENERATE));
+        $this->toolbar->addButtonInstance($buttonLearningSuggestionGenerate);
+
         $table = new LearningObjectiveCourseTableGUI($this);
         $query = new LearningObjectiveCourseQuery(new ConfigProvider());
         $table->setCourses($query->getAll());
@@ -317,6 +332,81 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
             $config->set($item->getPostVar(), $value);
         }
     }
+
+    /**
+     * @throws ilCtrlException
+     */
+    private function learningSuggestionsGenerate(): void
+    {
+        global $DIC;
+
+        $config = new ConfigProvider();
+        $refIds = $config->getCourseRefIds();
+
+        foreach ($refIds as $ref_id) {
+            $objId = ilObject::_lookupObjectId($ref_id);
+            $settings = ilLOSettings::getInstanceByObjId($objId);
+            $initialTestRefId = $settings->getInitialTest();
+            $test = new ilObjTest($initialTestRefId, true);
+
+            $testRefIds = ilObject::_getAllReferences($test->getId());
+            $learningObjectiveSuggestion = new LearningObjectiveSuggestion();
+            $userIds = [];
+            if ($test->participantDataExist()) {
+                $activeParticipantsList = $test->getActiveParticipantList();
+                $userIds = $this->removeInactiveUsers($activeParticipantsList->getAllUserIds());
+            }
+
+            foreach ($userIds as $key => $userId) {
+                $learningSuggestionExists = $learningObjectiveSuggestion->suggestionExists($userId, $objId);
+
+                if ($learningSuggestionExists) {
+                    unset($userIds[$key]);
+                }
+            }
+            $userIds = array_values($userIds);
+
+            $parent_found = false;
+            $parent = 0;
+            foreach ($testRefIds as $refId) {
+                $parent = $DIC->repositoryTree()->getParentId($refId);
+                if (in_array($parent, $refIds)) {
+                    $parent_found = true;
+                    break;
+                }
+            }
+
+            if ($parent_found && ilObject::_lookupType($parent, true) === 'crs') {
+                $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
+
+                if (!$course->getIsCalculationInactive()) {
+                    foreach ($userIds as $userId) {
+                        $user = new User(new ilObjUser($userId));
+                        if ($this->pl->startCalculation($course, $user)) {
+                            $this->pl->sendSuggestions($course, $user);
+                        }
+                    }
+                }
+            }
+        }
+        $this->tpl->setOnScreenMessage('success', $this->pl->txt('learning_suggestions_generated'), true);
+        $this->ctrl->redirect($this, self::CMD_CONFIGURE);
+    }
+
+    /**
+     * @param array $userIds
+     * @return array
+     */
+    private function removeInactiveUsers(array $userIds): array
+    {
+        foreach ($userIds as $key => $userId) {
+            if (!ilObjUser::_lookupActive($userId)) {
+                unset($userIds[$key]);
+            }
+        }
+        return array_values($userIds);
+    }
+
     protected function saveNotifications(): void
     {
         $this->addTabs(self::TAB_CONFIGURE_NOTIFICATIONS);

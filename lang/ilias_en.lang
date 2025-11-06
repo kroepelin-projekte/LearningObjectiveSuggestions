@@ -65,3 +65,5 @@ activate_calculation#:#Activate Calculation
 role_assignment#:#Role Assignment
 role_assignment_config#:#Role Assignment configuration
 calculation#:#Calculation
+learning_suggestion_generate#:#Learning Suggestion Generate
+learning_suggestions_generated#:#Learning Suggestion Generated

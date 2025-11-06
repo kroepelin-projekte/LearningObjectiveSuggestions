@@ -139,7 +139,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
      * @param User                    $user
      * @return bool
      */
-    protected function startCalculation(LearningObjectiveCourse $course, User $user): bool
+    public function startCalculation(LearningObjectiveCourse $course, User $user): bool
     {
         $calculation = new CalculateScoresAndSuggestions(
             $this->db,
@@ -154,7 +154,7 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
      * @param User                    $user
      * @return void
      */
-    protected function sendSuggestions(LearningObjectiveCourse $course, User $user): void
+    public function sendSuggestions(LearningObjectiveCourse $course, User $user): void
     {
         $send_suggestions = new SendSuggestions(
             $this->db,

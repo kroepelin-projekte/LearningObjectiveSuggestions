@@ -65,3 +65,5 @@ activate_calculation#:#Calculation aktivieren
 role_assignment#:#Rollenzuweisung
 role_assignment_config#:#Rollenzuweisung Konfiguration
 calculation#:#Berechnung
+learning_suggestion_generate#:#Learnemfehlungen Generieren
+learning_suggestions_generated#:#Learnemfehlungen wurden generiert
