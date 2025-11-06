@@ -329,11 +329,15 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
             $settings = ilLOSettings::getInstanceByObjId($objId);
             $initialTestRefId = $settings->getInitialTest();
             $test = new ilObjTest($initialTestRefId, true);
-            $activeParticipantsList = $test->getActiveParticipantList();
-            $userIds = $this->removeInactiveUsers($activeParticipantsList->getAllUserIds());
             $testRefIds = ilObject::_getAllReferences($test->getId());
-
             $learningObjectiveSuggestion = new LearningObjectiveSuggestion();
+
+            $userIds = [];
+            if ($test->participantDataExist()) {
+                $activeParticipantsList = $test->getActiveParticipantList();
+                $userIds = $this->removeInactiveUsers($activeParticipantsList->getAllUserIds());
+            }
+
             foreach ($userIds as $key => $userId) {
                 $learningSuggestionExists = $learningObjectiveSuggestion->suggestionExists($userId, $objId);
 
