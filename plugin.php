@@ -1,6 +1,6 @@
 <?php
 $id = 'dhbwautolo';
-$version = '1.1.0';
+$version = '1.1.0'; // TODO version 1.2.0 or 2.0.0 ???
 $ilias_min_version = '10.0';
 $ilias_max_version = '10.999';
 $responsible = 'Kröpelin Projekt GmbH';

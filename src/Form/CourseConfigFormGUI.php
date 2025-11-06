@@ -67,32 +67,6 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         $item->setTitle($this->pl->txt("general"));
         $this->addItem($item);
 
-        $item = new \ilMultiSelectInputGUI($this->pl->txt("objectives_main"), 'learning_objectives_main');
-        $item->setInfo($this->pl->txt("objectives_main_info"));
-        $item->setRequired(true);
-        $item->setWidth(100);
-        $item->setWidthUnit('%');
-        $item->setHeight(150);
-        $objectives = $this->getObjectives();
-        $options = array();
-        foreach ($objectives as $objective) {
-            $options[$objective->getId()] = $objective->getTitle();
-        }
-        $item->setOptions($options);
-
-        $jsonString = $this->config->get($item->getPostVar());
-        $item->setValue(json_decode($jsonString ?: '{}', true));
-        $this->addItem($item);
-
-        $item = clone $item;
-        $item->setTitle($this->pl->txt("objectives_extended"));
-        $item->setPostVar('learning_objectives_extended');
-        $item->setInfo($this->pl->txt("objectives_extended_info"));
-
-        $jsonString = $this->config->get($item->getPostVar());
-        $item->setValue(json_decode($jsonString ?: '{}', true));
-        $this->addItem($item);
-
         $item = new \ilNumberInputGUI($this->pl->txt("min_amount_suggestions"), 'min_amount_suggestions');
         $item->setInfo($this->pl->txt("min_amount_suggestions_info"));
         $item->setValue($this->config->get($item->getPostVar()));

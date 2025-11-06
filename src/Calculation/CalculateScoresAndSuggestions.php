@@ -17,6 +17,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjective
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestionGenerator;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfig;
 
 class CalculateScoresAndSuggestions
 {
@@ -76,7 +77,28 @@ class CalculateScoresAndSuggestions
 
         $atLeastOneActionDone = false;
 
+
+        $study_program = $study_program_query->getByUser($user);
+
+
+
+
+
         foreach ($objective_results as $objective_result) {
+
+            $objective = $objective_result->getLearningObjective();
+            $weightRough = $config->getWeightRough($objective, $study_program);
+
+
+            // TODO confirm this
+            if ((int) $weightRough === 0) {
+                continue;
+            }
+            dd($weightRough);
+
+
+
+
             $score = $this->getLearningObjectiveScore($objective_result);
 
             if ($score->getCreatedAt() !== null) {
@@ -100,8 +122,30 @@ class CalculateScoresAndSuggestions
             }
         }
 
+
+
+
+
+
+
+
+
+       /* foreach ($currentScores as $score) {
+
+            $key = '';
+            $configs = CourseConfig::where(array(
+                'cfg_key' => $key,
+                'course_obj_id' => $score->getCourseObjId(),
+            ))->get();
+
+            dd($config);
+
+        }
+        dd($currentScores);*/
+
         $generator = new LearningObjectiveSuggestionGenerator($config, $learning_objective_query, $this->log);
         $currentScores = $this->getScores($course, $user);
+
         $suggestedScores = $generator->generate($currentScores);
 
         if (!empty($suggestedScores)) {
