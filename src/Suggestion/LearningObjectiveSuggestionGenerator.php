@@ -51,9 +51,6 @@ class LearningObjectiveSuggestionGenerator
             return $scores;
         }
 
-
-        dd($scores);
-
         // For each learning objective we calculate a target score which determines if a learning objective is suggested
         $target_scores = array();
         foreach ($scores as $i => $score) {
@@ -106,6 +103,8 @@ class LearningObjectiveSuggestionGenerator
         }
 
         // TODO confirm the calculation logic
+        // TODO remove DB entries for learning_objectives_main and learning_objectives_extended
+
         return $suggestions;
 
 

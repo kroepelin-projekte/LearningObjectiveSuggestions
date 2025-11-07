@@ -51,6 +51,7 @@ class CalculateScoresAndSuggestions
 
         return $hasAtLeastOneUpdate;
     }
+
     protected function runForUser(LearningObjectiveCourse $course, User $user): bool
     {
         $config = new CourseConfigProvider($course);
@@ -64,41 +65,26 @@ class CalculateScoresAndSuggestions
         $set = $this->db->query($this->getSQL($course, $user));
         $objective_results = [];
 
+        $study_program = $study_program_query->getByUser($user);
         while ($row = $this->db->fetchObject($set)) {
             $objective = $this->getLearningObjective($course, $row->objective_id);
+            $weightRough = $config->getWeightRough($objective, $study_program);
 
-            if ($study_program_query->getByUser($user) != null) {
-                $objective_results[] = new LearningObjectiveResult($objective, $user);
+            // TODO confirm this. Ask if $weightRough should be included in score calculation if is 0
+            if ((int) $weightRough > 0) {
+                if ($study_program_query->getByUser($user) != null) {
+                    $objective_results[] = new LearningObjectiveResult($objective, $user);
+                }
             }
         }
+
         if (empty($objective_results)) {
             return false;
         }
 
         $atLeastOneActionDone = false;
 
-
-        $study_program = $study_program_query->getByUser($user);
-
-
-
-
-
         foreach ($objective_results as $objective_result) {
-
-            $objective = $objective_result->getLearningObjective();
-            $weightRough = $config->getWeightRough($objective, $study_program);
-
-
-            // TODO confirm this
-            if ((int) $weightRough === 0) {
-                continue;
-            }
-            dd($weightRough);
-
-
-
-
             $score = $this->getLearningObjectiveScore($objective_result);
 
             if ($score->getCreatedAt() !== null) {
@@ -121,27 +107,6 @@ class CalculateScoresAndSuggestions
                 $this->log->write($e->getTraceAsString());
             }
         }
-
-
-
-
-
-
-
-
-
-       /* foreach ($currentScores as $score) {
-
-            $key = '';
-            $configs = CourseConfig::where(array(
-                'cfg_key' => $key,
-                'course_obj_id' => $score->getCourseObjId(),
-            ))->get();
-
-            dd($config);
-
-        }
-        dd($currentScores);*/
 
         $generator = new LearningObjectiveSuggestionGenerator($config, $learning_objective_query, $this->log);
         $currentScores = $this->getScores($course, $user);
