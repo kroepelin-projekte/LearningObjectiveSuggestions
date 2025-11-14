@@ -221,7 +221,8 @@ class CalculateScoresAndSuggestions
 
         return $user;
     }
-    protected function getLearningObjective(LearningObjectiveCourse $course, int $objective_id): LearningObjective
+
+    public function getLearningObjective(LearningObjectiveCourse $course, int $objective_id): LearningObjective
     {
         static $cache = array();
         $cache_key = $course->getId() . $objective_id;
@@ -233,7 +234,8 @@ class CalculateScoresAndSuggestions
 
         return $objective;
     }
-    protected function getSQL(LearningObjectiveCourse $course, User $user): string
+
+    public function getSQL(LearningObjectiveCourse $course, User $user): string
     {
         $sql = 'SELECT DISTINCT loc_user_results.* FROM loc_user_results
 				LEFT JOIN ' . LearningObjectiveScore::TABLE_NAME . ' ON 
