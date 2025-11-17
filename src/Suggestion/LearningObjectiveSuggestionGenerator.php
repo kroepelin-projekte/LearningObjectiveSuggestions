@@ -101,14 +101,7 @@ class LearningObjectiveSuggestionGenerator
             $sorted = $this->sortDescByScore($candidates);
             $suggestions[count($suggestions) - 1] = $sorted[0];
         }
-
-        // TODO confirm the calculation logic
-        // TODO remove DB entries for learning_objectives_main and learning_objectives_extended
-
         return $suggestions;
-
-
-
     }
 
     /**

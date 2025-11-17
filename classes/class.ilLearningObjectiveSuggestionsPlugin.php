@@ -110,14 +110,14 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
 
             $config = new ConfigProvider();
 
-            $ref_ids = $config->getCourseRefIds();
-            $tst_ref_ids = ilObject::_getAllReferences($a_parameter['obj_id']);
+            $refIds = $config->getCourseRefIds();
+            $tstRefIds = ilObject::_getAllReferences($a_parameter['obj_id']);
 
             $parent_found = false;
             $parent = 0;
-            foreach ($tst_ref_ids as $ref_id) {
-                $parent = $DIC->repositoryTree()->getParentId($ref_id);
-                if (in_array($parent, $ref_ids)) {
+            foreach ($tstRefIds as $testRefId) {
+                $parent = $DIC->repositoryTree()->getParentId($testRefId);
+                if (in_array($parent, $refIds)) {
                     $parent_found = true;
                     break;
                 }
@@ -163,5 +163,37 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
             new Log()
         );
         $send_suggestions->run($course, $user);
+    }
+
+    protected function afterActivation(): void
+    {
+        $config = new ConfigProvider();
+
+        $courseRefIds = $config->getCourseRefIds();
+
+        foreach ($courseRefIds as $courseRefId) {
+            $this->deleteCourseConfig((int) $courseRefId, 'learning_objectives_main');
+            $this->deleteCourseConfig((int) $courseRefId, 'learning_objectives_extended');
+        }
+    }
+
+    /**
+     * @param int    $courseRefId
+     * @param string $cfg
+     * @return void
+     */
+    private function deleteCourseConfig(int $courseRefId, string $cfg): void
+    {
+        $courseObject = new ilObjCourse($courseRefId, true);
+
+        $courseConfigs = CourseConfig::where([
+            'course_obj_id' => $courseObject->getId(),
+            'cfg_key' => $cfg
+        ])->get();
+
+        foreach ($courseConfigs as $courseConfig) {
+            /** @var CourseConfig $courseConfig */
+            $courseConfig->delete();
+        }
     }
 }

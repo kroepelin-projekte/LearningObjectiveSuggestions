@@ -66,15 +66,13 @@ class CalculateScoresAndSuggestions
         $objective_results = [];
 
         $study_program = $study_program_query->getByUser($user);
+
         while ($row = $this->db->fetchObject($set)) {
             $objective = $this->getLearningObjective($course, $row->objective_id);
             $weightRough = $config->getWeightRough($objective, $study_program);
 
-            // TODO confirm this. Ask if objective should be included in score calculation if is 0
-            if ((int) $weightRough > 0) {
-                if ($study_program_query->getByUser($user) != null) {
-                    $objective_results[] = new LearningObjectiveResult($objective, $user);
-                }
+            if ((int) $weightRough > 0 && $study_program_query->getByUser($user) != null) {
+                $objective_results[] = new LearningObjectiveResult($objective, $user);
             }
         }
 
@@ -117,7 +115,6 @@ class CalculateScoresAndSuggestions
             $this->createSuggestions($suggestedScores);
             $atLeastOneActionDone = true;
         }
-
         return $atLeastOneActionDone;
     }
     /**
