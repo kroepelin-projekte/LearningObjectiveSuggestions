@@ -90,7 +90,6 @@ class CourseConfigProvider
     }
     public function getIsCalculationInactive(): bool
     {
-        //TODO change the is_cron_inactive table to is_calculation_inactive
         return (bool) $this->get('is_calculation_inactive');
     }
     public function getRoleAssignmentConfig(): string
