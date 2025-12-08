@@ -167,13 +167,17 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
 
     protected function afterActivation(): void
     {
-        $config = new ConfigProvider();
+        try {
+            $config = new ConfigProvider();
 
-        $courseRefIds = $config->getCourseRefIds();
+            $courseRefIds = $config->getCourseRefIds();
 
-        foreach ($courseRefIds as $courseRefId) {
-            $this->deleteCourseConfig((int) $courseRefId, 'learning_objectives_main');
-            $this->deleteCourseConfig((int) $courseRefId, 'learning_objectives_extended');
+            foreach ($courseRefIds as $courseRefId) {
+                $this->deleteCourseConfig((int) $courseRefId, 'learning_objectives_main');
+                $this->deleteCourseConfig((int) $courseRefId, 'learning_objectives_extended');
+            }
+        } catch (\Throwable $e) {
+            ilLoggerFactory::getLogger('plugin')->error("Activation failed: " . $e->getMessage());
         }
     }
 
@@ -184,10 +188,10 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
      */
     private function deleteCourseConfig(int $courseRefId, string $cfg): void
     {
-        $courseObject = new ilObjCourse($courseRefId, true);
+        $courseObjectId = ilObject::_lookupObjId($courseRefId);
 
         $courseConfigs = CourseConfig::where([
-            'course_obj_id' => $courseObject->getId(),
+            'course_obj_id' => $courseObjectId,
             'cfg_key' => $cfg
         ])->get();
 
