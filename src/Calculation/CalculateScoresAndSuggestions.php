@@ -65,13 +65,10 @@ class CalculateScoresAndSuggestions
         $set = $this->db->query($this->getSQL($course, $user));
         $objective_results = [];
 
-        $study_program = $study_program_query->getByUser($user);
-
         while ($row = $this->db->fetchObject($set)) {
             $objective = $this->getLearningObjective($course, $row->objective_id);
-            $weightRough = $config->getWeightRough($objective, $study_program);
 
-            if ((int) $weightRough > 0 && $study_program_query->getByUser($user) != null) {
+            if ($study_program_query->getByUser($user) != null) {
                 $objective_results[] = new LearningObjectiveResult($objective, $user);
             }
         }
