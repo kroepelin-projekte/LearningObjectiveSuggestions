@@ -60,7 +60,7 @@ class CourseConfigProvider
     {
         return (int) $this->get('min_amount_suggestions');
     }
-    public function getWeightRough(LearningObjective $learning_objective, StudyProgram $study_program): int|string
+    public function getWeightRough(LearningObjective $learning_objective, StudyProgram $study_program): int|string|null
     {
         return $this->get('weight_rough_' . $learning_objective->getId() . '_' . $study_program->getId());
     }
