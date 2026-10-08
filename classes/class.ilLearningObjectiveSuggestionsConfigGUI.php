@@ -87,7 +87,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
     }
     protected function configureCourse(): void
     {
-        $this->addTabs(self::TAB_CONFIGURE_COURSE);
+        $this->addActions(self::TAB_CONFIGURE_COURSE);
         $this->tabs->setBackTarget($this->pl->txt("back"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE));
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $this->initCourseHeader($course);
@@ -144,7 +144,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
     }
     protected function configureNotifications(): void
     {
-        $this->addTabs(self::TAB_CONFIGURE_NOTIFICATIONS);
+        $this->addActions(self::TAB_CONFIGURE_NOTIFICATIONS);
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $this->initCourseHeader($course);
         $this->tabs->setBackTarget($this->pl->txt("back"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE));
@@ -409,7 +409,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
 
     protected function saveNotifications(): void
     {
-        $this->addTabs(self::TAB_CONFIGURE_NOTIFICATIONS);
+        $this->addActions(self::TAB_CONFIGURE_NOTIFICATIONS);
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $config = new CourseConfigProvider($course);
         $this->tabs->setBackTarget($this->pl->txt("back"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE));
@@ -425,7 +425,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
     }
     protected function save(): void
     {
-        $this->addTabs(self::TAB_CONFIGURE_COURSE);
+        $this->addActions(self::TAB_CONFIGURE_COURSE);
         $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
         $this->tabs->setBackTarget($this->pl->txt("back"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE));
         $this->initCourseHeader($course);
@@ -453,10 +453,12 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $config->set('is_calculation_inactive', 1);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
     }
-    protected function addTabs(string $active = ''): void
+
+    protected function addActions(string $active = ''): void
     {
         $this->tabs->addTab(self::TAB_CONFIGURE_COURSE, $this->pl->txt("basic_configuration"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE_COURSE));
         $this->tabs->addTab(self::TAB_CONFIGURE_NOTIFICATIONS, $this->pl->txt("notifications"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE_NOTIFICATIONS));
+
         if ($active) {
             $this->tabs->activateTab($active);
         }
