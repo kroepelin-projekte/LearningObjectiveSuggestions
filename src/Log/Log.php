@@ -8,5 +8,4 @@ class Log extends \ilLog
     {
         parent::__construct(ILIAS_DATA_DIR, 'learning-objective-suggestions.log');
     }
-
 }

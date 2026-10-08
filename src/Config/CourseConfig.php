@@ -8,11 +8,16 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Notification;
 
 class CourseConfig extends \ActiveRecord
 {
-    public const TABLE_NAME = "alo_crs_config";
+    public const string TABLE_NAME = 'alo_crs_config';
+
+    /**
+     * @return string
+     */
     public function getConnectorContainerName(): string
     {
         return self::TABLE_NAME;
     }
+
     /**
      * @deprecated
      */
@@ -20,6 +25,7 @@ class CourseConfig extends \ActiveRecord
     {
         return self::TABLE_NAME;
     }
+
     /**
      * @var int
      *
@@ -30,6 +36,7 @@ class CourseConfig extends \ActiveRecord
      * @db_sequence     true
      */
     protected ?int $id;
+
     /**
      * @var int
      *
@@ -38,6 +45,7 @@ class CourseConfig extends \ActiveRecord
      * @db_length       8
      */
     protected int $course_obj_id;
+
     /**
      * @var string
      *
@@ -46,6 +54,7 @@ class CourseConfig extends \ActiveRecord
      * @db_length       64
      */
     protected string $cfg_key;
+
     /**
      * @var string
      *
@@ -54,6 +63,9 @@ class CourseConfig extends \ActiveRecord
      */
     protected string $value;
 
+    /**
+     * @return void
+     */
     public function delete(): void
     {
         foreach (LearningObjectiveSuggestion::where(['course_obj_id' => $this->getCourseObjId()])->get() as $learning_objective_suggestions) {
@@ -79,30 +91,61 @@ class CourseConfig extends \ActiveRecord
 
         parent::delete();
     }
+
+    /**
+     * @return int
+     */
     public function getId(): int
     {
         return $this->id;
     }
+
+    /**
+     * @return int
+     */
     public function getCourseObjId(): int
     {
         return $this->course_obj_id;
     }
+
+    /**
+     * @param int $course_obj_id
+     * @return void
+     */
     public function setCourseObjId(int $course_obj_id): void
     {
         $this->course_obj_id = $course_obj_id;
     }
+
+    /**
+     * @return string
+     */
     public function getKey(): string
     {
         return $this->cfg_key;
     }
+
+    /**
+     * @param string $key
+     * @return void
+     */
     public function setKey(string $key): void
     {
         $this->cfg_key = $key;
     }
+
+    /**
+     * @return string
+     */
     public function getValue(): string
     {
         return $this->value;
     }
+
+    /**
+     * @param string $value
+     * @return void
+     */
     public function setValue(string $value): void
     {
         $this->value = $value;

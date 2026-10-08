@@ -12,6 +12,7 @@ interface Parser
      * @return string
      */
     public function parse(string $template, array $placeholders): string;
+
     /**
      * Check if the template can be parsed
      *

@@ -20,12 +20,16 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 class NotificationConfigFormGUI extends ilPropertyFormGUI
 {
     protected CourseConfigProvider $config;
-    protected Parser $parser;
-    protected ?ilObjUser $user;
-    protected ilLanguage $lng;
-    protected ilLearningObjectiveSuggestionsPlugin $pl;
-    protected \ilTemplate $tpl;
 
+    protected Parser $parser;
+
+    protected ?ilObjUser $user;
+
+    protected ilLanguage $lng;
+
+    protected ilLearningObjectiveSuggestionsPlugin $pl;
+
+    protected \ilTemplate $tpl;
 
     /**
      * @param CourseConfigProvider $config
@@ -53,57 +57,62 @@ class NotificationConfigFormGUI extends ilPropertyFormGUI
         if (!$this->parser->isValid($this->getInput('email_subject'), $ph)) {
             /** @var ilFormPropertyGUI $subject */
             $subject = $this->getItemByPostVar('email_subject');
-            $subject->setAlert($this->pl->txt("invalid_placeholders"));
+            $subject->setAlert($this->pl->txt('invalid_placeholders'));
             $result = false;
         }
         if (!$this->parser->isValid($this->getInput('email_body'), $ph)) {
             /** @var ilFormPropertyGUI $body */
             $body = $this->getItemByPostVar('email_body');
-            $body->setAlert($this->pl->txt("invalid_placeholders"));
+            $body->setAlert($this->pl->txt('invalid_placeholders'));
             $result = false;
         }
         if (!$result) {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt("form_input_not_valid"), true);
+            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('form_input_not_valid'), true);
         }
 
         return $result;
     }
+
+    /**
+     * @return void
+     * @throws \ilCtrlException
+     */
     protected function init(): void
     {
-        $this->setTitle($this->pl->txt("configuration"));
+        $this->setTitle($this->pl->txt('configuration'));
 
-        $item = new ilTextInputGUI($this->pl->txt("sender_user_id"), 'notification_sender_user_id');
-        $item->setInfo($this->pl->txt("sender_user_id_info"));
+        $item = new ilTextInputGUI($this->pl->txt('sender_user_id'), 'notification_sender_user_id');
+        $item->setInfo($this->pl->txt('sender_user_id_info'));
         $item->setRequired(true);
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setDataSource($this->ctrl->getLinkTargetByClass(ilLearningObjectiveSuggestionsConfigGUI::class, ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_NOTIFICATIONS_USERS_AUTOCOMPLETE, "", true));
         $this->addItem($item);
 
-        $item = new ilTextInputGUI($this->pl->txt("cc_role_id"), 'notification_cc_role_id');
-        $item->setInfo($this->pl->txt("cc_role_id_info"));
+        $item = new ilTextInputGUI($this->pl->txt('cc_role_id'), 'notification_cc_role_id');
+        $item->setInfo($this->pl->txt('cc_role_id_info'));
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setDataSource($this->ctrl->getLinkTargetByClass(ilLearningObjectiveSuggestionsConfigGUI::class, ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_NOTIFICATIONS_ROLES_AUTOCOMPLETE, "", true));
         $this->addItem($item);
 
         $item = new ilFormSectionHeaderGUI();
-        $item->setTitle($this->pl->txt("templates"));
+        $item->setTitle($this->pl->txt('templates'));
         $this->addItem($item);
 
-        $item = new ilTextInputGUI($this->pl->txt("subject"), 'email_subject');
+        $item = new ilTextInputGUI($this->pl->txt('subject'), 'email_subject');
         $item->setRequired(true);
         $item->setValue($this->config->get($item->getPostVar()));
         $this->addItem($item);
 
-        $item = new ilTextAreaInputGUI($this->pl->txt("body"), 'email_body');
+        $item = new ilTextAreaInputGUI($this->pl->txt('body'), 'email_body');
         $item->setRequired(true);
-        $item->setInfo($this->pl->txt("body_info"));
+        $item->setInfo($this->pl->txt('body_info'));
         $item->setRows(10);
         if (!is_null($this->config->get($item->getPostVar()))) {
             $item->setValue($this->config->get($item->getPostVar()));
         }
         $this->addItem($item);
 
-        $info = "<br>" . $this->pl->txt("placeholders_info") . "<br><br>";
+        $info = "<br>" . $this->pl->txt('placeholders_info') . "<br><br>";
         $ph = array();
         $placeholders = new Placeholders();
         foreach ($placeholders->getAvailablePlaceholders() as $key => $value) {

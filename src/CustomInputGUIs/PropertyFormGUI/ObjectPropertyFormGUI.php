@@ -8,13 +8,13 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\PropertyForm
 
 abstract class ObjectPropertyFormGUI extends PropertyFormGUI
 {
-
     /**
      * @var ilObject|ActiveRecord|object|null
      *
      * @deprecated
      */
     protected $object;
+
     /**
      * @var bool
      *
@@ -46,7 +46,7 @@ abstract class ObjectPropertyFormGUI extends PropertyFormGUI
      *
      * @deprecated
      */
-    public final function getObject()
+    final public function getObject()
     {
         return $this->object;
     }
@@ -69,7 +69,7 @@ abstract class ObjectPropertyFormGUI extends PropertyFormGUI
         }
 
         if ($this->object_auto_store) {
-            if (method_exists($this->object, "store")) {
+            if (method_exists($this->object, 'store')) {
                 $this->object->store();
             } else {
                 if ($this->object instanceof ilObject) {
@@ -79,17 +79,16 @@ abstract class ObjectPropertyFormGUI extends PropertyFormGUI
                         $this->object->create();
                     }
                 } else {
-                    if (method_exists($this->object, "save")) {
+                    if (method_exists($this->object, 'save')) {
                         $this->object->save();
                     } else {
-                        if (method_exists($this->object, "update")) {
+                        if (method_exists($this->object, 'update')) {
                             $this->object->update();
                         }
                     }
                 }
             }
         }
-
         return true;
     }
 
@@ -118,7 +117,7 @@ abstract class ObjectPropertyFormGUI extends PropertyFormGUI
      *
      * @deprecated
      */
-    protected function storeValue(string $key, $value)/*: void*/
+    protected function storeValue(string $key, $value): void
     {
         switch ($key) {
             default:

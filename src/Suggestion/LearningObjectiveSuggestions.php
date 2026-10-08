@@ -8,8 +8,8 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 class LearningObjectiveSuggestions
 {
     protected LearningObjectiveCourse $course;
-    protected User $user;
 
+    protected User $user;
 
     /**
      * LearningObjectiveSuggestions constructor.
@@ -22,6 +22,7 @@ class LearningObjectiveSuggestions
         $this->course = $course;
         $this->user = $user;
     }
+
     /**
      * @return LearningObjectiveSuggestion[]
      */
@@ -31,6 +32,10 @@ class LearningObjectiveSuggestions
             'user_id' => $this->user->getId(),
             'course_obj_id' => $this->course->getId()))->get();
     }
+
+    /**
+     * @return bool
+     */
     public function isCalculationInactive(): bool
     {
         return LearningObjectiveSuggestion::where(array(
@@ -38,6 +43,10 @@ class LearningObjectiveSuggestions
             'course_obj_id' => $this->course->getId(),
             'is_calculation_active' => 0))->hasSets();
     }
+
+    /**
+     * @return void
+     */
     public function setCalculationActive(): void
     {
         foreach ($this->getSuggestions() as $suggestion) {
@@ -45,6 +54,10 @@ class LearningObjectiveSuggestions
             $suggestion->store();
         }
     }
+
+    /**
+     * @return void
+     */
     public function setCalculationInactive(): void
     {
         foreach ($this->getSuggestions() as $suggestion) {
@@ -52,6 +65,7 @@ class LearningObjectiveSuggestions
             $suggestion->store();
         }
     }
+
     /**
      * Checks if calculation is set to inactive for the given course/user pair
      */

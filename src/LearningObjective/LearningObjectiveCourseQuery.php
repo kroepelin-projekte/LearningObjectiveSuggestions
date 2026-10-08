@@ -8,10 +8,18 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\ConfigProvider;
 class LearningObjectiveCourseQuery
 {
     protected ConfigProvider $config;
+
+    /**
+     * @param ConfigProvider $config
+     */
     public function __construct(ConfigProvider $config)
     {
         $this->config = $config;
     }
+
+    /**
+     * @return array|null
+     */
     public function getAll(): ?array
     {
         static $cache = null;

@@ -7,6 +7,11 @@ use Twig\Loader\ArrayLoader;
 
 class TwigParser implements Parser
 {
+    /**
+     * @param string $template
+     * @param array $placeholders
+     * @return string
+     */
     public function parse(string $template, array $placeholders): string
     {
         $twig = $this->getTwig();
@@ -14,6 +19,12 @@ class TwigParser implements Parser
 
         return $tpl->render($placeholders);
     }
+
+    /**
+     * @param string $template
+     * @param array  $placeholders
+     * @return bool
+     */
     public function isValid(string $template, array $placeholders): bool
     {
         try {
@@ -24,14 +35,17 @@ class TwigParser implements Parser
             return false;
         }
     }
+
+    /**
+     * @return Environment|null
+     */
     protected function getTwig(): ?Environment
     {
         static $instance = null;
         if ($instance !== null) {
             return $instance;
         }
-        /*$loader = new \Twig_Loader_Array([]);
-        $twig = new \Twig_Environment($loader, array( 'autoescape' => false ));*/
+
         $loader = new ArrayLoader([]);
         $twig = new Environment($loader, ['autoescape' => false]);
         $instance = $twig;

@@ -8,6 +8,9 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 
 class Placeholders
 {
+    /**
+     * @return string[]
+     */
     public function getAvailablePlaceholders(): array
     {
         return array(
@@ -20,6 +23,13 @@ class Placeholders
             'objectives' => 'objectives'
         );
     }
+
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @param array                   $objectives
+     * @return array
+     */
     public function getPlaceholders(LearningObjectiveCourse $course, User $user, array $objectives): array
     {
         return array(
@@ -28,6 +38,7 @@ class Placeholders
             'objectives' => $this->renderObjectives($objectives),
         );
     }
+
     /**
      * @param LearningObjective[] $objectives
      */

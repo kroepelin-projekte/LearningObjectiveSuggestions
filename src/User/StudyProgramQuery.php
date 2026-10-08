@@ -6,8 +6,10 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 
 class StudyProgramQuery
 {
-    private const DEFAULT_STUDY_PROGRAM_TITLE = 'Allgemein';
+    private const string DEFAULT_STUDY_PROGRAM_TITLE = 'Allgemein';
+
     protected CourseConfigProvider $config;
+
     protected \ilSetting $udf_setting;
 
     /**
@@ -35,8 +37,8 @@ class StudyProgramQuery
         // The data is separated with an arrow, wtf...
         //13.04.2021 Modification DHBW from old master
         if ($this->isCascadingSelect()) {
-            $titleExploded = explode("→", $title);
-            list($level1, $title, $_) = array_pad(array_map('trim', $titleExploded), 3, null);
+            $title_exploded = explode("→", $title);
+            list($level1, $title, $_) = array_pad(array_map('trim', $title_exploded), 3, null);
 
             if (empty($title)) {
                 $title = $level1;

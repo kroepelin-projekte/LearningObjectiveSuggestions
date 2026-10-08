@@ -2,9 +2,6 @@
 
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\DclExportMiddleware;
 
-//require_once __DIR__ ."../../../../../WebServices/SoapHook/DataCollectionSOAPServices/vendor/autoload.php";
-
-
 use ilDclBaseRecordModel;
 use ilObjCourse;
 use ilObjUser;
@@ -14,24 +11,30 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningOb
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 
-//use srag\Plugins\DataCollectionSOAPServices\RecordsOfDataCollectionViewExtendMiddleware;
-
 class LosDclExportMiddleware implements RecordsOfDataCollectionViewExtendMiddleware
 {
+    /**
+     * @return RecordsOfDataCollectionViewExtendMiddleware
+     */
     public static function new(): RecordsOfDataCollectionViewExtendMiddleware
     {
         return new static();
     }
 
+    /**
+     * @param array                $record_data
+     * @param ilDclBaseRecordModel $record
+     * @return array
+     */
     public function process(array $record_data, ilDclBaseRecordModel $record): array
     {
         $crs_ref_ids = SendSuggestionsCronJob::getCrsRefIdsWithInitialTestStates($record->getOwner());
 
-        $record_data["UsrId"] = $record->getOwner();
-        $record_data["PercentageDet"] = -1;
-        $record_data["StudyProgram"] = null;
-        $record_data["DclRefid"] = $record->getTable()->getCollectionObject()->getRefId();
-        $record_data["DclTitle"] = $record->getTable()->getCollectionObject()->getTitle();
+        $record_data['UsrId'] = $record->getOwner();
+        $record_data['PercentageDet'] = -1;
+        $record_data['StudyProgram'] = null;
+        $record_data['DclRefid'] = $record->getTable()->getCollectionObject()->getRefId();
+        $record_data['DclTitle'] = $record->getTable()->getCollectionObject()->getTitle();
 
 
         if (count($crs_ref_ids) === 0) {
@@ -47,10 +50,10 @@ class LosDclExportMiddleware implements RecordsOfDataCollectionViewExtendMiddlew
 
 
 
-        $record_data["PercentageDet"] = SendSuggestionsCronJob::getTestUserResult($record->getOwner(), $crs_ref_id);
+        $record_data['PercentageDet'] = SendSuggestionsCronJob::getTestUserResult($record->getOwner(), $crs_ref_id);
         $study_program = $study_program_query->getByUser(new User(new ilObjUser($record->getOwner())));
         if (is_object($study_program)) {
-            $record_data["StudyProgram"] = $study_program->getTitle();
+            $record_data['StudyProgram'] = $study_program->getTitle();
         }
         return $record_data;
     }

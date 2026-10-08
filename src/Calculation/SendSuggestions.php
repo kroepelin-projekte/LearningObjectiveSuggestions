@@ -28,8 +28,12 @@ class SendSuggestions
     protected Parser $parser;
     protected \ilLearningObjectiveSuggestionsPlugin $pl;
 
-    public function __construct(ilDBInterface $db, ConfigProvider $config, Parser $parser, Log $log)
-    {
+    public function __construct(
+        ilDBInterface $db,
+        ConfigProvider $config,
+        Parser $parser,
+        Log $log
+    ) {
         $this->db = $db;
         $this->config = $config;
         $this->parser = $parser;
@@ -37,16 +41,26 @@ class SendSuggestions
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return void
+     */
     public function run(LearningObjectiveCourse $course, User $user): void
     {
         $this->runForCourse($course, $user);
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return void
+     */
     protected function runForCourse(LearningObjectiveCourse $course, User $user): void
     {
         $set = $this->db->query($this->getSQL($course, $user));
-        while ($row = $this->db->fetchObject($set)) {
 
+        while ($row = $this->db->fetchObject($set)) {
             $this->assignToRole($course, $user->getId());
             if ($row->sent_at === null) {
                 $this->send($course, $user);
@@ -54,6 +68,11 @@ class SendSuggestions
         }
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param int                     $user_id
+     * @return void
+     */
     protected function assignToRole(LearningObjectiveCourse $course, int $user_id): void
     {
         global $DIC;
@@ -71,11 +90,15 @@ class SendSuggestions
                 }
             }
         } catch (\Exception $e) {
-            $this->log->write("Error while trying to assign roles for learning objective suggestions: " . $e->getMessage());
+            $this->log->write('Error while trying to assign roles for learning objective suggestions: ' . $e->getMessage());
             $this->log->write($e->getTraceAsString());
         }
     }
 
+    /**
+     * @param int $user_id
+     * @return array
+     */
     public static function getCrsRefIdsWithInitialTestStates(int $user_id): array
     {
         $arr_initial_test_states = ilCrsInitialTestStates::getData([$user_id]);
@@ -86,18 +109,24 @@ class SendSuggestions
                 $arr_crs_ref_ids[] = $initial_test_state->getCrsitestCrsRefId();
             }
         }
-
         return $arr_crs_ref_ids;
     }
 
+    /**
+     * @param int $user_id
+     * @param int $crs_ref_id
+     * @return float
+     */
     public static function getTestUserResult(int $user_id, int $crs_ref_id): float
     {
         // Fix missing tpl ui in calculation context used in test question object constructor
         global $DIC;
-        if (!$DIC->offsetExists("tpl")) {
-            $DIC["tpl"] = $GLOBALS["tpl"] = new ilTemplate("tpl.main_menu.html", true, true, "Services/MainMenu");
+
+        if (!$DIC->offsetExists('tpl')) {
+            $DIC['tpl'] = $GLOBALS['tpl'] = new ilTemplate('tpl.main_menu.html', true, true, 'Services/MainMenu');
         }
         $arr_initial_test_states = ilCrsInitialTestStates::getData([$user_id], $crs_ref_id);
+
         if (count($arr_initial_test_states) > 0) {
             /**
              * @var ilCrsInitialTestState $arr_initial_test_state
@@ -133,8 +162,8 @@ class SendSuggestions
             foreach ($data as $row) {
                 if ($row['user_id'] == $user_id) {
                     $perc = round((float) $row['percent_value'] * 100, 2);
-                    $max = $row["max_points"];
-                    $res = $row["reached_points"];
+                    $max = $row['max_points'];
+                    $res = $row['reached_points'];
                 }
             }
             if ($max == 0) {
@@ -145,6 +174,11 @@ class SendSuggestions
         return (-1);
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return void
+     */
     protected function send(LearningObjectiveCourse $course, User $user): void
     {
         $config = new CourseConfigProvider($course);
@@ -163,14 +197,18 @@ class SendSuggestions
                 $this->log->write(sprintf($msg, $course->getTitle(), $user->__toString()));
             }
         } catch (\Exception $e) {
-            $this->log->write("Error while trying to send learning objective suggestions: " . $e->getMessage());
+            $this->log->write('Error while trying to send learning objective suggestions: ' . $e->getMessage());
             $this->log->write($e->getTraceAsString());
         }
     }
 
+    /**
+     * @param int $user_id
+     * @return User
+     */
     protected function getUser(int $user_id): User
     {
-        static $cache = array();
+        static $cache = [];
         if (isset($cache[$user_id])) {
             return $cache[$user_id];
         }
@@ -190,12 +228,12 @@ class SendSuggestions
             'user_id' => $user->getId(),
             'course_obj_id' => $course->getId(),
         ))->orderBy('sort')->get();
-        $objectives = array();
+
+        $objectives = [];
         foreach ($suggestions as $suggestion) {
             /** @var $suggestion LearningObjectiveSuggestion */
             $objectives[] = $query->getByObjectiveId($suggestion->getObjectiveId());
         }
-
         return $objectives;
     }
 

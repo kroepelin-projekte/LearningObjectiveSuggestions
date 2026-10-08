@@ -6,25 +6,26 @@ use ilFormException;
 
 final class PropertyFormGUIException extends ilFormException
 {
+    /**
+     * @var int
+     *
+     * @deprecated
+     */
+    public const int CODE_INVALID_FIELD = 2;
 
     /**
      * @var int
      *
      * @deprecated
      */
-    const CODE_INVALID_FIELD = 2;
+    public const int CODE_INVALID_PROPERTY_CLASS = 1;
+
     /**
      * @var int
      *
      * @deprecated
      */
-    const CODE_INVALID_PROPERTY_CLASS = 1;
-    /**
-     * @var int
-     *
-     * @deprecated
-     */
-    const CODE_MISSING_CONST_CONFIG_CLASS_NAME = 3;
+    public const int CODE_MISSING_CONST_CONFIG_CLASS_NAME = 3;
 
 
     /**

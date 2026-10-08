@@ -8,21 +8,33 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningOb
 class LearningObjectiveCourseTableGUI extends \ilTable2GUI
 {
     protected \ilCtrl $ctrl;
+
     protected \ilLearningObjectiveSuggestionsPlugin $pl;
+
+    /**
+     * @param $a_parent_obj
+     * @throws \ilCtrlException
+     */
     public function __construct($a_parent_obj)
     {
         global $DIC;
+
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
         parent::__construct($a_parent_obj, '', '');
         $this->ctrl = $DIC->ctrl();
         $this->setFormAction($this->ctrl->getFormAction($a_parent_obj));
         $this->setRowTemplate('tpl.row_generic.html', $this->pl->getDirectory());
-        $this->setTitle($this->pl->txt("courses"));
+        $this->setTitle($this->pl->txt('courses'));
         $this->addColumns();
     }
+
+    /**
+     * @param array $courses
+     * @return void
+     */
     public function setCourses(array $courses): void
     {
-        $data = array();
+        $data = [];
         foreach ($courses as $course) {
             /**
              * @var LearningObjectiveCourse $course
@@ -36,6 +48,10 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
         }
         $this->setData($data);
     }
+
+    /***
+     * @return void
+     */
     protected function addColumns(): void
     {
         foreach ($this->getSelectableColumns() as $column => $data) {
@@ -64,9 +80,9 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
                 case 'is_calculation_active':
                     $factory = $DIC->ui()->factory();
                     if ($a_set[$column] === true) {
-                        $value = "active";
+                        $value = 'active';
                     } else {
-                        $value = "inactive";
+                        $value = 'inactive';
                     }
                     break;
                 default:
@@ -99,12 +115,16 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
 
         $this->tpl->parseCurrentBlock();
     }
+
+    /**
+     * @return array[]
+     */
     public function getSelectableColumns(): array
     {
-        return array(
-            'ref_id' => array( 'txt' => $this->pl->txt("ref_id"), 'default' => true ),
-            'title' => array( 'txt' => $this->pl->txt("title"), 'default' => true ),
-            'is_calculation_active' => array( 'txt' => $this->pl->txt("calculation"), 'default' => true )
-        );
+        return [
+            'ref_id' => [ 'txt' => $this->pl->txt('ref_id'), 'default' => true ],
+            'title' => [ 'txt' => $this->pl->txt('title'), 'default' => true ],
+            'is_calculation_active' => [ 'txt' => $this->pl->txt('calculation'), 'default' => true ]
+        ];
     }
 }

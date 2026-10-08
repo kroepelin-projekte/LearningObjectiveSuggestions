@@ -7,10 +7,15 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 class LearningObjectiveQuery
 {
     protected CourseConfigProvider $config;
+
+    /**
+     * @param CourseConfigProvider $config
+     */
     public function __construct(CourseConfigProvider $config)
     {
         $this->config = $config;
     }
+
     /**
      * Get all learning objectives
      */
@@ -32,6 +37,11 @@ class LearningObjectiveQuery
 
         return $objectives;
     }
+
+    /**
+     * @param int $objective_id
+     * @return LearningObjective
+     */
     public function getByObjectiveId(int $objective_id): LearningObjective
     {
         $filtered = array_filter($this->getAll(), function ($objective) use ($objective_id) {
@@ -41,6 +51,7 @@ class LearningObjectiveQuery
 
         return array_pop($filtered);
     }
+
     /**
      * Get the learning objectives belonging to the main section
      *
@@ -55,6 +66,7 @@ class LearningObjectiveQuery
             return (in_array($objective->getId(), $main));
         });
     }
+
     /**
      * Get the learning objectives belonging to the extended section
      *

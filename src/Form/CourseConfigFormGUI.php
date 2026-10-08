@@ -16,12 +16,23 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 class CourseConfigFormGUI extends \ilPropertyFormGUI
 {
     protected CourseConfigProvider $config;
+
     protected LearningObjectiveQuery $objective_query;
+
     protected StudyProgramQuery $study_program_query;
+
     protected \ilLearningObjectiveSuggestionsPlugin $pl;
 
-    public function __construct(CourseConfigProvider $config, LearningObjectiveQuery $objective_query, StudyProgramQuery $study_program_query)
-    {
+    /**
+     * @param CourseConfigProvider   $config
+     * @param LearningObjectiveQuery $objective_query
+     * @param StudyProgramQuery      $study_program_query
+     */
+    public function __construct(
+        CourseConfigProvider $config,
+        LearningObjectiveQuery $objective_query,
+        StudyProgramQuery $study_program_query
+    ) {
         parent::__construct();
         $this->config = $config;
         $this->objective_query = $objective_query;
@@ -29,9 +40,13 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
         $this->init();
     }
+
+    /**
+     * @return void
+     */
     protected function init(): void
     {
-        $this->setTitle($this->pl->txt("configuration"));
+        $this->setTitle($this->pl->txt('configuration'));
 
         $options = array();
         $definitions = \ilUserDefinedFields::_getInstance()->getDefinitions();
@@ -39,15 +54,15 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
             $options[$field_id] = $data['field_name'];
         }
 
-        $udf = new \ilSelectInputGUI($this->pl->txt("udf_study_program"), 'udf_id_study_program');
-        $udf->setInfo($this->pl->txt("udf_study_program_info"));
+        $udf = new \ilSelectInputGUI($this->pl->txt('udf_study_program'), 'udf_id_study_program');
+        $udf->setInfo($this->pl->txt('udf_study_program_info'));
         $udf->setOptions($options);
         $udf->setRequired(true);
         $udf->setValue($this->config->get('udf_id_study_program'));
 
         if ($this->config->get('udf_id_study_program')) {
-            $item = new \ilCheckboxInputGUI($this->pl->txt("change_udf_study_program"), 'change_mapping_ids');
-            $item->setInfo($this->pl->txt("change_udf_study_program_info"));
+            $item = new \ilCheckboxInputGUI($this->pl->txt('change_udf_study_program'), 'change_mapping_ids');
+            $item->setInfo($this->pl->txt('change_udf_study_program_info'));
             $item->addSubItem($udf);
             $this->addItem($item);
             $this->addGeneralConfig();
@@ -61,43 +76,51 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         $this->addCommandButton(\ilLearningObjectiveSuggestionsConfigGUI::CMD_SAVE, $this->pl->txt("save"));
         $this->addCommandButton(\ilLearningObjectiveSuggestionsConfigGUI::CMD_CANCEL, $this->pl->txt("cancel"));
     }
+
+    /**
+     * @return void
+     */
     protected function addGeneralConfig(): void
     {
         $item = new \ilFormSectionHeaderGUI();
-        $item->setTitle($this->pl->txt("general"));
+        $item->setTitle($this->pl->txt('general'));
         $this->addItem($item);
 
-        $item = new \ilNumberInputGUI($this->pl->txt("min_amount_suggestions"), 'min_amount_suggestions');
-        $item->setInfo($this->pl->txt("min_amount_suggestions_info"));
+        $item = new \ilNumberInputGUI($this->pl->txt('min_amount_suggestions'), 'min_amount_suggestions');
+        $item->setInfo($this->pl->txt('min_amount_suggestions_info'));
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setRequired(true);
         $this->addItem($item);
 
-        $item = new \ilNumberInputGUI($this->pl->txt("max_amount_suggestions"), 'max_amount_suggestions');
-        $item->setInfo($this->pl->txt("max_amount_suggestions_info"));
+        $item = new \ilNumberInputGUI($this->pl->txt('max_amount_suggestions'), 'max_amount_suggestions');
+        $item->setInfo($this->pl->txt('max_amount_suggestions_info'));
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setRequired(true);
         $this->addItem($item);
 
-        $item = new \ilNumberInputGUI($this->pl->txt("bias"), 'bias');
+        $item = new \ilNumberInputGUI($this->pl->txt('bias'), 'bias');
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setRequired(true);
         $this->addItem($item);
 
-        $item = new \ilNumberInputGUI($this->pl->txt("offset"), 'offset');
+        $item = new \ilNumberInputGUI($this->pl->txt('offset'), 'offset');
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setRequired(true);
         $this->addItem($item);
 
-        $item = new \ilNumberInputGUI($this->pl->txt("steps"), 'steps');
+        $item = new \ilNumberInputGUI($this->pl->txt('steps'), 'steps');
         $item->setValue($this->config->get($item->getPostVar()));
         $item->setRequired(true);
         $this->addItem($item);
     }
+
+    /**
+     * @return void
+     */
     protected function addWeightFineConfig(): void
     {
         $item = new \ilFormSectionHeaderGUI();
-        $item->setTitle($this->pl->txt("weight_fine"));
+        $item->setTitle($this->pl->txt('weight_fine'));
         $this->addItem($item);
         foreach ($this->getObjectives() as $objective) {
             $item = new \ilNumberInputGUI($objective->getTitle(), 'weight_fine_' . $objective->getId());
@@ -107,11 +130,15 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
             $this->addItem($item);
         }
     }
+
+    /**
+     * @return void
+     */
     protected function addWeightRoughConfig(): void
     {
         foreach ($this->study_program_query->getAll() as $study_program) {
             $item = new \ilFormSectionHeaderGUI();
-            $item->setTitle($this->pl->txt("weight_rough") . ' "' . $study_program->getTitle() . '"');
+            $item->setTitle($this->pl->txt('weight_rough') . ' "' . $study_program->getTitle() . '"');
             $this->addItem($item);
             foreach ($this->getObjectives() as $objective) {
                 $post_var = 'weight_rough_' . $objective->getId() . '_' . $study_program->getId();
@@ -124,12 +151,16 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
             }
         }
     }
+
+    /**
+     * @return void
+     */
     protected function addRoleAssignmentConfig(): void
     {
         global $DIC;
 
         $item = new \ilFormSectionHeaderGUI();
-        $item->setTitle($this->pl->txt("role_assignment"));
+        $item->setTitle($this->pl->txt('role_assignment'));
         $this->addItem($item);
 
         $item = new MultiLineNewInputGUI($this->pl->txt('role_assignment_config'), 'role_assignment_config');
@@ -149,6 +180,10 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         $this->addItem($item);
         $item->setRequired(false);
     }
+
+    /**
+     * @return array
+     */
     protected function getAllRoles(): array
     {
         global $DIC;
@@ -162,6 +197,10 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
 
         return $options;
     }
+
+    /**
+     * @return array
+     */
     protected function getAllTests(): array
     {
         global $DIC;
@@ -174,6 +213,10 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
         }
         return $options;
     }
+
+    /**
+     * @return array|null
+     */
     protected function getObjectives(): ?array
     {
         static $objectives = null;
