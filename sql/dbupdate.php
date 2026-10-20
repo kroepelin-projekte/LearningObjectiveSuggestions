@@ -81,9 +81,9 @@ while ($row = $this->db->fetchAssoc($results)) {
 }
 
 /** @var CourseConfig $config */
-$configs = SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfig::where(array(
+$configs = SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfig::where([
         'cfg_key' => 'udf_id_study_program',
-))->get();
+])->get();
 
 if(!empty($configs)) {
     foreach ($configs as $config) {

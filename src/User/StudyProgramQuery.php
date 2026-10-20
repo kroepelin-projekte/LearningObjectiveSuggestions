@@ -110,7 +110,6 @@ class StudyProgramQuery
 
         // Check if field is of type CascadingSelect
         if (!$this->isCascadingSelect($study_program_field_id)) {
-            // TODO test this
             $data = json_decode($field_values, true)
                 ?? unserialize($field_values, ['allowed_classes' => false])
                 ?: [];
