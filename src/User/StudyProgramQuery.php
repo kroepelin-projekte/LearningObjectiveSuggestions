@@ -6,11 +6,12 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 use ilObjUser;
 use Leifos\CascadingSelect\DataObjects\Parser as CascadingSelectParser;
 use Leifos\CascadingSelect\Service\Container as CascadingSelectContainer;
-
+use ILIAS\Mail\RecipientSearch\UserSearchAutocompleteItemResult;
 
 class StudyProgramQuery
 {
-    private const string DEFAULT_STUDY_PROGRAM_TITLE = 'Allgemein';
+    private const string USER_FIELD_TYPE_CASCADING_SELECT = 'Leifos\CascadingSelect\UserFieldType';
+
 
     protected CourseConfigProvider $config;
 
@@ -110,6 +111,7 @@ class StudyProgramQuery
 
         // Check if field is of type CascadingSelect
         if (!$this->isCascadingSelect($study_program_field_id)) {
+            // TODO test this case, wehn it happens?????
             $data = json_decode($field_values, true)
                 ?? unserialize($field_values, ['allowed_classes' => false])
                 ?: [];
@@ -117,9 +119,6 @@ class StudyProgramQuery
                 $programs[] = new StudyProgram($id, $title);
             }
         } else {
-            $parser = (new CascadingSelectContainer())->definitionParser();
-
-            $udf_definition = $this->getUdfDefinition($study_program_field_id);
             $study_program_old_filed_id = $this->getOldFieldId($study_program_field_id);
             $xml = $this->getXMLCascadingSelect($study_program_old_filed_id);
 
@@ -130,7 +129,6 @@ class StudyProgramQuery
 
                 if ($result->isValid()) {
                     $definition = $result->definition();
-                    $definition_field_values = $definition->serialize();
 
                     // The study programs are options on the second level of all data available on the first level
                     foreach ($definition->options() as $level1) {
@@ -179,7 +177,7 @@ class StudyProgramQuery
         $udf_definition = $this->getUdfDefinition($study_program_field_id);
 
         // type is hardcoded here, since CascadingSelect may be not installed
-        return ((string) $udf_definition['field_type'] === '51');
+        return ((string) $udf_definition['field_type'] === self::USER_FIELD_TYPE_CASCADING_SELECT);
     }
 
     /**
