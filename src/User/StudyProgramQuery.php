@@ -69,10 +69,11 @@ class StudyProgramQuery
     /**
      * @return string
      */
-    protected function getStudyProgramFieldId(): ?string
+    private function getStudyProgramFieldId(): ?string
     {
         global $DIC;
 
+        // TODO FIx it
         $id = (string) $this->config->get('udf_id_study_program');
 
         // Validate that $id is not integer. In ILIAS11 it's UUID
@@ -96,7 +97,7 @@ class StudyProgramQuery
      * @return array
      * @throws \JsonException
      */
-    public function getAll($user): array
+    public function getAll(): array
     {
         static $cache = [];
 

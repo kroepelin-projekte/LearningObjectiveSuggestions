@@ -3,6 +3,7 @@
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\ConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form\CourseConfigFormGUI;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form\CourseConfigMainFormGUI;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form\NotificationConfigFormGUI;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveCourse;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveCourseQuery;
@@ -130,13 +131,37 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $this->initCourseHeader($course);
         $config = new CourseConfigProvider($course);
 
+        $udf_definition = $this->getUdfDefinition();
+
+        $learning_objective_query = new LearningObjectiveQuery($config);
+        $objectives = $this->getObjectives($learning_objective_query);
+
         $form = new CourseConfigFormGUI(
             $config,
-            new LearningObjectiveQuery($config),
-            new StudyProgramQuery($config)
+            $learning_objective_query,
+            new StudyProgramQuery($config),
+            $udf_definition
         );
         $form->setFormAction($this->ctrl->getFormAction($this));
-        $this->tpl->setContent($form->getHTML());
+
+        global $DIC;
+
+        $ui = $DIC->ui()->factory();
+        $renderer = $DIC->ui()->renderer();
+        $request = $DIC->http()->request();
+        $ctrl = $DIC->ctrl();
+        $udef_definition = $this->getUdfDefinition();
+
+        $course_main_config_form = new CourseConfigMainFormGUI(
+            $config,
+            $this->pl,
+            $objectives,
+            new StudyProgramQuery($config),
+            $udef_definition
+        );
+        $main_form = $course_main_config_form->getMainConfigForm();
+
+        $this->tpl->setContent($renderer->render($main_form) . $form->getHTML());
     }
 
     /**
@@ -428,10 +453,12 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         foreach ($form->getItems() as $item) {
             /** @var ilFormPropertyGUI $item */
             $value = $form->getInput($item->getPostVar());
+
             if ($value === null) {
                 continue;
             }
             $value = (is_array($value)) ? json_encode($value) : $value;
+
             $config->set($item->getPostVar(), $value);
         }
     }
@@ -537,6 +564,52 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $this->tpl->setContent($form->getHTML());
     }
 
+    protected function saveMainConfig(): void
+    {
+        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $config = new CourseConfigProvider($course);
+
+        $learning_objective_query = new LearningObjectiveQuery($config);
+        $objectives = $this->getObjectives($learning_objective_query);
+        $udef_definition = $this->getUdfDefinition();
+
+        $course_main_config_form = new CourseConfigMainFormGUI(
+            $config,
+            $this->pl,
+            $objectives,
+            new StudyProgramQuery($config),
+            $udef_definition
+        );
+        $main_form = $course_main_config_form->save();
+
+        dd("OK");
+        $this->addActions(self::TAB_CONFIGURE_COURSE);
+        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $this->tabs->setBackTarget(
+            $this->pl->txt('back'),
+            $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE)
+        );
+        $this->initCourseHeader($course);
+        $config = new CourseConfigProvider($course);
+
+        $udf_definition = $this->getUdfDefinition();
+
+        $form = new CourseConfigFormGUI(
+            $config,
+            new LearningObjectiveQuery($config),
+            new StudyProgramQuery($config),
+            $udf_definition
+        );
+        /*if ($form->checkInput()) {
+            $this->storeConfig($config, $form);
+            $this->tpl->setOnScreenMessage('success', $this->pl->txt('configuration_saved'), true);
+            $this->ctrl->redirect($this, self::CMD_CONFIGURE_COURSE);
+        }
+        $form->setValuesByPost();
+
+        $this->tpl->setContent($form->getHTML());*/
+    }
+
     /**
      * @return void
      * @throws ilCtrlException
@@ -552,7 +625,14 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         $this->initCourseHeader($course);
         $config = new CourseConfigProvider($course);
 
-        $form = new CourseConfigFormGUI($config, new LearningObjectiveQuery($config), new StudyProgramQuery($config));
+        $udf_definition = $this->getUdfDefinition();
+
+        $form = new CourseConfigFormGUI(
+            $config,
+            new LearningObjectiveQuery($config),
+            new StudyProgramQuery($config),
+            $udf_definition
+        );
         if ($form->checkInput()) {
             $this->storeConfig($config, $form);
             $this->tpl->setOnScreenMessage('success', $this->pl->txt('configuration_saved'), true);
@@ -608,5 +688,39 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
         if ($active) {
             $this->tabs->activateTab($active);
         }
+    }
+
+    /**
+     * @return array
+     */
+    private function getUdfDefinition(): array
+    {
+        global $DIC;
+
+        $sql = "SELECT * FROM udf_definition";
+
+        $results = $DIC->database()->query($sql);
+
+        $data = [];
+        while ($row = $DIC->database()->fetchAssoc($results)) {
+            $data[$row['field_id']] = $row['field_name'];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param $learning_objective_query
+     * @return array|null
+     */
+    protected function getObjectives($learning_objective_query): ?array
+    {
+        static $objectives = null;
+        if ($objectives !== null) {
+            return $objectives;
+        }
+        $objectives = $learning_objective_query->getAll();
+
+        return $objectives;
     }
 }

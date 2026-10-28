@@ -2,8 +2,6 @@
 
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form;
 
-use ilCrsInitialTestStates;
-use ilLearningObjectiveSuggestionsConfigGUI;
 use ilObject;
 use ilRbacReview;
 use ilSelectInputGUI;
@@ -23,21 +21,26 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
 
     protected \ilLearningObjectiveSuggestionsPlugin $pl;
 
+    private array $udf_definition;
+
     /**
      * @param CourseConfigProvider   $config
      * @param LearningObjectiveQuery $objective_query
      * @param StudyProgramQuery      $study_program_query
+     * @param array                  $udf_definition
      */
     public function __construct(
         CourseConfigProvider $config,
         LearningObjectiveQuery $objective_query,
-        StudyProgramQuery $study_program_query
+        StudyProgramQuery $study_program_query,
+        array $udf_definition
     ) {
         parent::__construct();
         $this->config = $config;
         $this->objective_query = $objective_query;
         $this->study_program_query = $study_program_query;
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
+        $this->udf_definition = $udf_definition;
         $this->init();
     }
 
@@ -46,28 +49,24 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
      */
     protected function init(): void
     {
-        $this->setTitle($this->pl->txt('configuration'));
+        //$this->setTitle($this->pl->txt('configuration'));
 
-        $options = array();
-        $definitions = \ilUserDefinedFields::_getInstance()->getDefinitions();
-        foreach ($definitions as $field_id => $data) {
-            $options[$field_id] = $data['field_name'];
-        }
+        $options = $this->udf_definition;
 
-        $udf = new \ilSelectInputGUI($this->pl->txt('udf_study_program'), 'udf_id_study_program');
+        /*$udf = new \ilSelectInputGUI($this->pl->txt('udf_study_program'), 'udf_id_study_program');
         $udf->setInfo($this->pl->txt('udf_study_program_info'));
         $udf->setOptions($options);
         $udf->setRequired(true);
-        $udf->setValue($this->config->get('udf_id_study_program'));
+        $udf->setValue($this->config->get('udf_id_study_program'));*/
 
         if ($this->config->get('udf_id_study_program')) {
-            $item = new \ilCheckboxInputGUI($this->pl->txt('change_udf_study_program'), 'change_mapping_ids');
+            /*$item = new \ilCheckboxInputGUI($this->pl->txt('change_udf_study_program'), 'change_mapping_ids');
             $item->setInfo($this->pl->txt('change_udf_study_program_info'));
             $item->addSubItem($udf);
-            $this->addItem($item);
-            $this->addGeneralConfig();
+            $this->addItem($item);*/
+            /*$this->addGeneralConfig();
             $this->addWeightFineConfig();
-            $this->addWeightRoughConfig();
+            $this->addWeightRoughConfig();*/
             $this->addRoleAssignmentConfig();
         } else {
             $this->addItem($udf);
@@ -157,8 +156,6 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
      */
     protected function addRoleAssignmentConfig(): void
     {
-        global $DIC;
-
         $item = new \ilFormSectionHeaderGUI();
         $item->setTitle($this->pl->txt('role_assignment'));
         $this->addItem($item);
