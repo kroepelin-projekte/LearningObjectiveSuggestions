@@ -3,17 +3,16 @@
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form;
 
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
-use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgram;
 use ilLearningObjectiveSuggestionsConfigGUI;
 
 /**
- * Class CourseConfigMainFormGUI
+ * Class CourseConfigKSFormGUI
  */
-class CourseConfigMainFormGUI
+class CourseConfigKSFormGUI
 {
-    private CourseConfigProvider $config;
+    private ?CourseConfigProvider $config;
 
     private $ctrl;
 
@@ -23,16 +22,16 @@ class CourseConfigMainFormGUI
 
     private $objectives;
 
-    private $udf_definition;
+    private ?array $udf_definition;
 
-    protected StudyProgramQuery $study_program_query;
+    private ?StudyProgramQuery $study_program_query;
 
     public function __construct(
-        CourseConfigProvider $config,
         $pl,
-        $objectives,
-        StudyProgramQuery $study_program_query,
-        array $udf_definition
+        ?CourseConfigProvider $config = null,
+        $objectives = null,
+        ?StudyProgramQuery $study_program_query = null,
+        ?array $udf_definition = null
     ) {
         global $DIC;
 
@@ -59,26 +58,27 @@ class CourseConfigMainFormGUI
 
         $checkbox_input = $this->ui->input()->field()->optionalGroup(
             [
-                'udf_id_study_program' => $select,
+                $select
             ],
             $this->pl->txt('change_udf_study_program'),
             $this->pl->txt('change_udf_study_program_info')
         );
 
         $udf_id_study_programm_section = $this->ui->input()->field()->section(
-            [$checkbox_input],
+            ['udf_id_study_program' => $checkbox_input],
             $this->pl->txt('configuration')
         );
 
         $sections_weight_rough = [];
-        foreach ($this->study_program_query->getAll() as $study_program) {
-            $sections_weight_rough['weight_rough_' . $study_program->getId()] = $this->buildWeightRoughConfigSections($study_program);
+        $study_programms_all = $this->study_program_query->getAll();
+        foreach ($study_programms_all as $study_program) {
+            $sections_weight_rough[] = $this->buildWeightRoughConfigSections($study_program);
         }
 
         $sections = [
-            'id_study_programm' => $udf_id_study_programm_section,
-            'general' => $this->buildGeneralConfigSection(),
-            'weight_fine' => $this->buildWeightFineConfigSection()
+            $udf_id_study_programm_section,
+            $this->buildGeneralConfigSection(),
+            $this->buildWeightFineConfigSection()
         ];
 
         return $this->ui->input()->container()->form()->standard(
@@ -154,7 +154,6 @@ class CourseConfigMainFormGUI
         foreach ($objectives as $objective) {
             $key = 'weight_rough_' . $objective->getId() . '_' . $study_program->getId();
             $value = $this->config->get($key);
-
             $inputs[$key] = $field->numeric($objective->getTitle())
                                   ->withRequired(true)
                                   ->withStepSize(0.01)
@@ -188,6 +187,13 @@ class CourseConfigMainFormGUI
         return $input;
     }
 
+    /**
+     * @param CourseConfigProvider $config
+     * @param                      $objectives
+     * @param StudyProgramQuery    $study_program_query
+     * @param array                $udf_definition
+     * @return void
+     */
     public function save()
     {
         global $DIC;
@@ -202,11 +208,53 @@ class CourseConfigMainFormGUI
             && array_key_exists('course_ref_id', $request->getQueryParams())
         ) {
             $form = $form->withRequest($request);
-            $result = $form->getData();
+            $data = $form->getData();
 
-            dd($result);
-        } else {
-            $result = "No result yet.";
+            foreach ($data as $values) {
+                foreach ($values as $key => $value) {
+                    if ($key == 'udf_id_study_program') {
+                        $this->config->set($key, $value[0]);
+                    } else {
+                        $this->config->set($key, $value);
+                    }
+                }
+            }
+
+            $tpl = $DIC->ui()->mainTemplate();
+            $tpl->setOnScreenMessage('success', $this->pl->txt('saved'), true);
         }
+    }
+
+    /**
+     * @return \ILIAS\UI\Component\Input\Container\Form\Standard
+     * @throws \ilCtrlException
+     */
+    public function getAddCourseFormGUI()
+    {
+        global $DIC;
+
+        $factory = $DIC->ui()->factory();
+
+        $field = $factory->input()->field();
+
+        $ref_id = $field->text($this->pl->txt('ref_id'), $this->pl->txt('ref_id_info'))
+                        ->withRequired(true)
+                        ->withDedicatedName('ref_id')
+                        /*->withAdditionalTransformation(
+                            $DIC->refinery()->custom()->constraint(
+                                fn(?int $id): bool => $id !== null && \ilObject::_lookupType($id, true) === 'crs',
+                                $this->pl->txt('ref_id_not_a_course')
+                            )
+                        )*/;
+
+        $section = $field->section(
+            ['ref_id' => $ref_id],
+            $this->pl->txt('create_course')
+        );
+
+        return $factory->input()->container()->form()->standard(
+            $this->ctrl->getFormAction(new ilLearningObjectiveSuggestionsConfigGUI(), 'saveCourse'),
+            ['course' => $section]
+        )->withSubmitLabel($this->pl->txt('save'));
     }
 }

@@ -95,6 +95,7 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
             $this->tpl->parseCurrentBlock();
         }
 
+        $this->ctrl->clearParameters($this->parent_obj);
         $this->ctrl->setParameter($this->parent_obj, 'course_ref_id', $a_set['ref_id']);
         $status = $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_ACTIVATE_CALCULATION);
         $statusText = $this->pl->txt('activate_calculation');
@@ -103,11 +104,11 @@ class LearningObjectiveCourseTableGUI extends \ilTable2GUI
             $statusText = $this->pl->txt('deactivate_calculation');
         }
 
-        $this->ctrl->clearParameters($this->parent_obj);
+
         $this->tpl->setCurrentBlock('td');
 
         $this->tpl->setVariable('LINK_CONFIGURE_COURSE_TEXT', $this->pl->txt('configurate'));
-        $this->tpl->setVariable('LINK_CONFIGURE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE) . '&course_ref_id=' . $a_set['ref_id']);
+        $this->tpl->setVariable('LINK_CONFIGURE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE)/* . '&course_ref_id=' . $a_set['ref_id']*/);
         $this->tpl->setVariable('LINK_DELETE_COURSE_TEXT', $this->pl->txt('delete_learning_objective_course'));
         $this->tpl->setVariable('LINK_DELETE_COURSE', $this->ctrl->getLinkTarget($this->parent_obj, \ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIRM_DELETE_COURSE_CONFIG));
         $this->tpl->setVariable('LINK_TOGGLE_STATUS_COURSE_TEXT', $statusText);

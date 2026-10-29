@@ -49,106 +49,21 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
      */
     protected function init(): void
     {
-        //$this->setTitle($this->pl->txt('configuration'));
-
         $options = $this->udf_definition;
 
-        /*$udf = new \ilSelectInputGUI($this->pl->txt('udf_study_program'), 'udf_id_study_program');
-        $udf->setInfo($this->pl->txt('udf_study_program_info'));
-        $udf->setOptions($options);
-        $udf->setRequired(true);
-        $udf->setValue($this->config->get('udf_id_study_program'));*/
-
         if ($this->config->get('udf_id_study_program')) {
-            /*$item = new \ilCheckboxInputGUI($this->pl->txt('change_udf_study_program'), 'change_mapping_ids');
-            $item->setInfo($this->pl->txt('change_udf_study_program_info'));
-            $item->addSubItem($udf);
-            $this->addItem($item);*/
-            /*$this->addGeneralConfig();
-            $this->addWeightFineConfig();
-            $this->addWeightRoughConfig();*/
             $this->addRoleAssignmentConfig();
         } else {
+            $udf = new \ilSelectInputGUI($this->pl->txt('udf_study_program'), 'udf_id_study_program');
+            $udf->setInfo($this->pl->txt('udf_study_program_info'));
+            $udf->setOptions($options);
+            $udf->setRequired(true);
+            $udf->setValue($this->config->get('udf_id_study_program'));
             $this->addItem($udf);
         }
 
-        $this->addCommandButton(\ilLearningObjectiveSuggestionsConfigGUI::CMD_SAVE, $this->pl->txt("save"));
+        $this->addCommandButton(\ilLearningObjectiveSuggestionsConfigGUI::CMD_SAVE_ROLES, $this->pl->txt("save"));
         $this->addCommandButton(\ilLearningObjectiveSuggestionsConfigGUI::CMD_CANCEL, $this->pl->txt("cancel"));
-    }
-
-    /**
-     * @return void
-     */
-    protected function addGeneralConfig(): void
-    {
-        $item = new \ilFormSectionHeaderGUI();
-        $item->setTitle($this->pl->txt('general'));
-        $this->addItem($item);
-
-        $item = new \ilNumberInputGUI($this->pl->txt('min_amount_suggestions'), 'min_amount_suggestions');
-        $item->setInfo($this->pl->txt('min_amount_suggestions_info'));
-        $item->setValue($this->config->get($item->getPostVar()));
-        $item->setRequired(true);
-        $this->addItem($item);
-
-        $item = new \ilNumberInputGUI($this->pl->txt('max_amount_suggestions'), 'max_amount_suggestions');
-        $item->setInfo($this->pl->txt('max_amount_suggestions_info'));
-        $item->setValue($this->config->get($item->getPostVar()));
-        $item->setRequired(true);
-        $this->addItem($item);
-
-        $item = new \ilNumberInputGUI($this->pl->txt('bias'), 'bias');
-        $item->setValue($this->config->get($item->getPostVar()));
-        $item->setRequired(true);
-        $this->addItem($item);
-
-        $item = new \ilNumberInputGUI($this->pl->txt('offset'), 'offset');
-        $item->setValue($this->config->get($item->getPostVar()));
-        $item->setRequired(true);
-        $this->addItem($item);
-
-        $item = new \ilNumberInputGUI($this->pl->txt('steps'), 'steps');
-        $item->setValue($this->config->get($item->getPostVar()));
-        $item->setRequired(true);
-        $this->addItem($item);
-    }
-
-    /**
-     * @return void
-     */
-    protected function addWeightFineConfig(): void
-    {
-        $item = new \ilFormSectionHeaderGUI();
-        $item->setTitle($this->pl->txt('weight_fine'));
-        $this->addItem($item);
-        foreach ($this->getObjectives() as $objective) {
-            $item = new \ilNumberInputGUI($objective->getTitle(), 'weight_fine_' . $objective->getId());
-            $item->setRequired(true);
-            $item->allowDecimals(true);
-            $item->setValue($this->config->get($item->getPostVar()));
-            $this->addItem($item);
-        }
-    }
-
-    /**
-     * @return void
-     */
-    protected function addWeightRoughConfig(): void
-    {
-        foreach ($this->study_program_query->getAll() as $study_program) {
-            $item = new \ilFormSectionHeaderGUI();
-            $item->setTitle($this->pl->txt('weight_rough') . ' "' . $study_program->getTitle() . '"');
-            $this->addItem($item);
-            foreach ($this->getObjectives() as $objective) {
-                $post_var = 'weight_rough_' . $objective->getId() . '_' . $study_program->getId();
-                $item = new \ilNumberInputGUI($objective->getTitle(), $post_var);
-                $item->setRequired(true);
-                $item->allowDecimals(true);
-                $value = $this->config->get($item->getPostVar());
-                $item->setValue($value === null ? 100 : $value);
-                $this->addItem($item);
-            }
-        }
     }
 
     /**
@@ -192,22 +107,6 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
             $options[$role_arr['obj_id']] = ilObject::_lookupTitle($role_arr['obj_id']);
         }
 
-        return $options;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAllTests(): array
-    {
-        global $DIC;
-        $roles = $DIC->rbac()->review()->getGlobalRoles();
-
-        $options = [];
-        $options[0] = '';
-        foreach ($roles as $role_id) {
-            $options[$role_id] = ilObject::_lookupTitle($role_id);
-        }
         return $options;
     }
 
