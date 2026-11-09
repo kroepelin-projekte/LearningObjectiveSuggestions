@@ -254,8 +254,13 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
             $udf_definition
         );
         $main_form = $course_main_config_form->getMainConfigForm();
+        $html  =$renderer->render($main_form);
 
-        $this->tpl->setContent($renderer->render($main_form) . $form->getHTML());
+        if ($config->get('udf_id_study_program')) {
+            $html .= $form->getHTML();
+        }
+
+        $this->tpl->setContent($html);
     }
 
     /**
