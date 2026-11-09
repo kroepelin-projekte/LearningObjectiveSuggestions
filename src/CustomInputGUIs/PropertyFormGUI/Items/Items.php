@@ -21,7 +21,7 @@ use TypeError;
 
 final class Items
 {
-    public const PLUGIN_DIRECTORY = 'Customizing/global/plugins/Services/EventHandling/EventHook/LearningObjectiveSuggestions';
+    public const string PLUGIN_DIRECTORY = 'Customizing/global/plugins/Services/EventHandling/EventHook/LearningObjectiveSuggestions';
 
     protected static bool $init = false;
 
@@ -30,62 +30,53 @@ final class Items
 
     }
 
-    public static final function getItem(string $key, array $field, ilPropertyFormGUI|ilFormPropertyGUI $parent_item, PropertyFormGUI $parent): ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption
+    /**
+     * @param string                              $key
+     * @param array                               $field
+     * @param ilPropertyFormGUI|ilFormPropertyGUI $parent_item
+     * @param PropertyFormGUI                     $parent
+     * @return ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption
+     * @throws PropertyFormGUIException
+     */
+    final public static function getItem(string $key, array $field, ilPropertyFormGUI|ilFormPropertyGUI $parent_item, PropertyFormGUI $parent): ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption
     {
         /**
          * @var ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item
          */
-        /*
-        if ($field[PropertyFormGUI::PROPERTY_CLASS] instanceof Input) {
-            $item = new UIInputComponentWrapperInputGUI($field[PropertyFormGUI::PROPERTY_CLASS], $key);
+        if (!class_exists($field[PropertyFormGUI::PROPERTY_CLASS])) {
+            throw new PropertyFormGUIException('Class ' . $field[PropertyFormGUI::PROPERTY_CLASS]
+                . ' not exists!', PropertyFormGUIException::CODE_INVALID_PROPERTY_CLASS);
+        }
 
-            if (empty($item->getTitle())) {
-                if (!$field["setTitle"]) {
+        if ($field[PropertyFormGUI::PROPERTY_CLASS] === ilRepositorySelector2InputGUI::class) {
+            $item = new $field[PropertyFormGUI::PROPERTY_CLASS]('', $key, false, get_class($parent));
+        } else {
+            $item = new $field[PropertyFormGUI::PROPERTY_CLASS]();
+        }
+
+        if ($item instanceof ilFormSectionHeaderGUI) {
+            if (!$field['setTitle']) {
+                $item->setTitle($parent->txt($key));
+            }
+        } else {
+            if ($item instanceof ilRadioOption) {
+                if (!$field['setTitle']) {
+                    $item->setTitle($parent->txt($parent_item->getPostVar() . '_' . $key));
+                }
+
+                $item->setValue($key);
+            } else {
+                if (!$field['setTitle']) {
                     $item->setTitle($parent->txt($key));
                 }
-            }
 
-            if (empty($item->getInfo())) {
-                if (!$field["setInfo"]) {
-                    $item->setInfo($parent->txt($key . "_info", ""));
-                }
+                $item->setPostVar($key);
             }
-        } else {*/
-            if (!class_exists($field[PropertyFormGUI::PROPERTY_CLASS])) {
-                throw new PropertyFormGUIException("Class " . $field[PropertyFormGUI::PROPERTY_CLASS]
-                    . " not exists!", PropertyFormGUIException::CODE_INVALID_PROPERTY_CLASS);
-            }
+        }
 
-            if ($field[PropertyFormGUI::PROPERTY_CLASS] === ilRepositorySelector2InputGUI::class) {
-                $item = new $field[PropertyFormGUI::PROPERTY_CLASS]("", $key, false, get_class($parent));
-            } else {
-                $item = new $field[PropertyFormGUI::PROPERTY_CLASS]();
-            }
-
-            if ($item instanceof ilFormSectionHeaderGUI) {
-                if (!$field["setTitle"]) {
-                    $item->setTitle($parent->txt($key));
-                }
-            } else {
-                if ($item instanceof ilRadioOption) {
-                    if (!$field["setTitle"]) {
-                        $item->setTitle($parent->txt($parent_item->getPostVar() . "_" . $key));
-                    }
-
-                    $item->setValue($key);
-                } else {
-                    if (!$field["setTitle"]) {
-                        $item->setTitle($parent->txt($key));
-                    }
-
-                    $item->setPostVar($key);
-                }
-            }
-
-            if (!$field["setInfo"]) {
-                $item->setInfo($parent->txt($key . "_info", ""));
-            }
-        //}
+        if (!$field['setInfo']) {
+            $item->setInfo($parent->txt($key . '_info', ''));
+        }
 
         self::setPropertiesToItem($item, $field);
 
@@ -100,26 +91,25 @@ final class Items
         return $item;
     }
 
+    /**
+     * @param ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item
+     * @return mixed
+     */
     public static function getValueFromItem(ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item): mixed
     {
-        /*if ($item instanceof MultiLineInputGUI) {
-            //return filter_input(INPUT_POST,$item->getPostVar()); // Not work because MultiLineInputGUI modify $_POST
-            return $_POST[$item->getPostVar()];
-        }*/
-
-        if (method_exists($item, "getChecked")) {
+        if (method_exists($item, 'getChecked')) {
             return boolval($item->getChecked());
         }
 
-        if (method_exists($item, "getDate")) {
+        if (method_exists($item, 'getDate')) {
             return $item->getDate();
         }
 
-        if (method_exists($item, "getImage")) {
+        if (method_exists($item, 'getImage')) {
             return $item->getImage();
         }
 
-        if (method_exists($item, "getValue") && !($item instanceof ilRadioOption)) {
+        if (method_exists($item, 'getValue') && !($item instanceof ilRadioOption)) {
             if ($item->getMulti()) {
                 return $item->getMultiValues();
             } else {
@@ -129,7 +119,7 @@ final class Items
                     $value = floatval($value);
                 } else {
                     if (empty($value) && !is_array($value)) {
-                        $value = "";
+                        $value = '';
                     }
                 }
 
@@ -140,19 +130,28 @@ final class Items
         return null;
     }
 
+    /**
+     * @param object $object
+     * @param string $property
+     * @return mixed
+     */
     public static function getter(object $object, string $property): mixed
     {
-        if (method_exists($object, $method = "get" . self::strToCamelCase($property))) {
+        if (method_exists($object, $method = 'get' . self::strToCamelCase($property))) {
             return $object->{$method}();
         }
 
-        if (method_exists($object, $method = "is" . self::strToCamelCase($property))) {
+        if (method_exists($object, $method = 'is' . self::strToCamelCase($property))) {
             return $object->{$method}();
         }
 
         return null;
     }
 
+    /**
+     * @param UIServices $ui
+     * @return void
+     */
     public static function init(UIServices $ui): void
     {
         if (self::$init === false) {
@@ -168,6 +167,7 @@ final class Items
     public static function renderInputs(array $inputs) : string
     {
         global $DIC;
+
         self::init($DIC->ui());
 
         $input_tpl = new ilTemplate(
@@ -179,10 +179,10 @@ final class Items
             true
         );
 
-        $input_tpl->setCurrentBlock("input");
+        $input_tpl->setCurrentBlock('input');
 
         foreach ($inputs as $input) {
-            $input_tpl->setVariable("TITLE", htmlspecialchars($input->getTitle()));
+            $input_tpl->setVariable('TITLE', htmlspecialchars($input->getTitle()));
 
             if ($input->getRequired()) {
                 $requiredInputGUI = new ilTemplate(
@@ -194,14 +194,14 @@ final class Items
                     true
                 );
 
-                $input_tpl->setVariable("REQUIRED", $requiredInputGUI->get());
+                $input_tpl->setVariable('REQUIRED', $requiredInputGUI->get());
             }
 
             $input_html = $input->render();
 
 
             $input_html = str_replace('<div class="help-block"></div>', "", $input_html);
-            $input_tpl->setVariable("INPUT", $input_html);
+            $input_tpl->setVariable('INPUT', $input_html);
 
             if ($input->getInfo()) {
                 $input_info_tpl = new ilTemplate(
@@ -213,9 +213,9 @@ final class Items
                     true
                 );
 
-                $input_info_tpl->setVariable("INFO", htmlspecialchars($input->getInfo()));
+                $input_info_tpl->setVariable('INFO', htmlspecialchars($input->getInfo()));
 
-                $input_tpl->setVariable("INFO", self::output()->getHTML($input_info_tpl));
+                $input_tpl->setVariable('INFO', self::output()->getHTML($input_info_tpl));
             }
 
             if ($input->getAlert()) {
@@ -228,10 +228,10 @@ final class Items
                     true
                 );
 
-                $input_alert_tpl->setVariable("IMG",
+                $input_alert_tpl->setVariable('IMG',
                     self::output()->getHTML(self::dic()->ui()->factory()->image()->standard(ilUtil::getImagePath("icon_alert.svg"), self::dic()->language()->txt("alert"))));
-                $input_alert_tpl->setVariable("TXT", htmlspecialchars($input->getAlert()));
-                $input_tpl->setVariable("ALERT", self::output()->getHTML($input_alert_tpl));
+                $input_alert_tpl->setVariable('TXT', htmlspecialchars($input->getAlert()));
+                $input_tpl->setVariable('ALERT', self::output()->getHTML($input_alert_tpl));
             }
 
             $input_tpl->parseCurrentBlock();
@@ -240,23 +240,21 @@ final class Items
         return $input_tpl->get();
     }
 
+    /**
+     * @param ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item
+     * @param mixed                                                  $value
+     * @return void
+     * @throws \ilDateTimeException
+     */
     public static function setValueToItem(ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item, mixed $value): void
     {
-        /*if ($item instanceof MultiLineInputGUI) {
-            $item->setValueByArray([
-                $item->getPostVar() => $value
-            ]);
-
-            return;
-        }*/
-
-        if (method_exists($item, "setChecked")) {
+        if (method_exists($item, 'setChecked')) {
             $item->setChecked($value);
 
             return;
         }
 
-        if (method_exists($item, "setDate")) {
+        if (method_exists($item, 'setDate')) {
             if (is_string($value)) {
                 $value = new ilDateTime($value, IL_CAL_DATE);
             }
@@ -266,22 +264,28 @@ final class Items
             return;
         }
 
-        if (method_exists($item, "setImage")) {
+        if (method_exists($item, 'setImage')) {
             $item->setImage($value);
 
             return;
         }
 
-        if (method_exists($item, "setValue") && !($item instanceof ilRadioOption)) {
+        if (method_exists($item, 'setValue') && !($item instanceof ilRadioOption)) {
             $item->setValue($value);
         }
     }
 
+    /**
+     * @param object $object
+     * @param string $property
+     * @param mixed  $value
+     * @return mixed
+     */
     public static function setter(object $object, string $property, mixed $value): mixed
     {
         $res = null;
 
-        if (method_exists($object, $method = "with" . self::strToCamelCase($property)) || method_exists($object, $method = "set" . self::strToCamelCase($property))) {
+        if (method_exists($object, $method = 'with' . self::strToCamelCase($property)) || method_exists($object, $method = "set" . self::strToCamelCase($property))) {
             try {
                 $res = $object->{$method}($value);
             } catch (TypeError $ex) {
@@ -296,11 +300,21 @@ final class Items
         return $res;
     }
 
+    /**
+     * @param string $string
+     * @return string
+     */
     public static function strToCamelCase(string $string) : string
     {
-        return str_replace("_", "", ucwords($string, "_"));
+        return str_replace('_', '', ucwords($string, '_'));
     }
 
+    /**
+     * @param ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item
+     * @param array                                                  $properties
+     * @return void
+     * @throws PropertyFormGUIException
+     */
     private static function setPropertiesToItem(ilFormPropertyGUI|ilFormSectionHeaderGUI|ilRadioOption $item, array $properties): void
     {
         foreach ($properties as $property_key => $property_value) {
@@ -308,20 +322,20 @@ final class Items
 
             switch ($property_key) {
                 case PropertyFormGUI::PROPERTY_DISABLED:
-                    $property = "setDisabled";
+                    $property = 'setDisabled';
                     break;
 
                 case PropertyFormGUI::PROPERTY_MULTI:
-                    $property = "setMulti";
+                    $property = 'setMulti';
                     break;
 
                 case PropertyFormGUI::PROPERTY_OPTIONS:
-                    $property = "setOptions";
+                    $property = 'setOptions';
                     $property_value = [$property_value];
                     break;
 
                 case PropertyFormGUI::PROPERTY_REQUIRED:
-                    $property = "setRequired";
+                    $property = 'setRequired';
                     break;
 
                 case PropertyFormGUI::PROPERTY_CLASS:
@@ -347,12 +361,12 @@ final class Items
                         if (method_exists($item->getExplorerGUI(), $property)) {
                             call_user_func_array([$item->getExplorerGUI(), $property], $property_value);
                         } else {
-                            throw new PropertyFormGUIException("Class " . get_class($item)
-                                . " has no method " . $property . "!", PropertyFormGUIException::CODE_INVALID_FIELD);
+                            throw new PropertyFormGUIException('Class ' . get_class($item)
+                                . ' has no method ' . $property . '!', PropertyFormGUIException::CODE_INVALID_FIELD);
                         }
                     } else {
-                        throw new PropertyFormGUIException("Class " . get_class($item)
-                            . " has no method " . $property . "!", PropertyFormGUIException::CODE_INVALID_FIELD);
+                        throw new PropertyFormGUIException('Class ' . get_class($item)
+                            . ' has no method ' . $property . '!', PropertyFormGUIException::CODE_INVALID_FIELD);
                     }
                 }
             }

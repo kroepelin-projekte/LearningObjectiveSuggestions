@@ -13,36 +13,55 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\PropertyForm
 
 class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterItem, ilToolbarItem
 {
-    public const PLUGIN_DIRECTORY = 'Customizing/global/plugins/Services/EventHandling/EventHook/LearningObjectiveSuggestions';
+    public const string PLUGIN_DIRECTORY = 'Customizing/global/plugins/Services/EventHandling/EventHook/LearningObjectiveSuggestions';
 
-    const SHOW_INPUT_LABEL_ALWAYS = 3;
-    const SHOW_INPUT_LABEL_NONE = 1;
-    const SHOW_INPUT_LABEL_ONCE = 2;
+    public const int SHOW_INPUT_LABEL_ALWAYS = 3;
+
+    public const int SHOW_INPUT_LABEL_NONE = 1;
+
+    public const int SHOW_INPUT_LABEL_ONCE = 2;
+
     protected static int $counter = 0;
+
     protected static bool $init = false;
+
     protected GlyphFactory $glyph_factory;
+
     /**
      * @var ilFormPropertyGUI[]
      */
     protected array $inputs = [];
+
     /**
      * @var ilFormPropertyGUI[]|null
      */
     protected ?array $inputs_generated = null;
+
     protected int $show_input_label = self::SHOW_INPUT_LABEL_ONCE;
     protected bool $show_sort = true;
+
     protected array $value = [];
+
     protected UIServices $ui;
 
-    public function __construct(string $title = "", string $post_var = "")
+    /**
+     * @param string $title
+     * @param string $post_var
+     */
+    public function __construct(string $title = '', string $post_var = '')
     {
         global $DIC;
+
         $this->ui = $DIC->ui();
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         parent::__construct($title, $post_var);
         self::init($this->ui);
     }
 
+    /**
+     * @param UIServices $ui
+     * @return void
+     */
     public static function init(UIServices $ui): void
     {
         if (self::$init === false) {
@@ -53,12 +72,19 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         }
     }
 
+    /**
+     * @param ilFormPropertyGUI $input
+     * @return void
+     */
     public function addInput(ilFormPropertyGUI $input): void
     {
         $this->inputs[] = $input;
         $this->inputs_generated = null;
     }
 
+    /**
+     * @return bool
+     */
     public function checkInput() : bool
     {
         //ToDo: consider to eliminate $ok, immediately return false if some var is empty
@@ -93,6 +119,10 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         }
     }
 
+    /**
+     * @param bool $need_one_line_at_least
+     * @return array|ilFormPropertyGUI[]
+     */
     public function getInputs(bool $need_one_line_at_least = true) : array
     {
         if ($this->inputs_generated === null) {
@@ -110,11 +140,11 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                         Items::setValueToItem($input, $value[$org_post_var]);
                     }
 
-                    $post_var = $this->getPostVar() . "[" . $i . "][";
-                    if (strpos($org_post_var, "[") !== false) {
-                        $post_var .= strstr($input->getPostVar(), "[", true) . "][" . strstr($org_post_var, "[");
+                    $post_var = $this->getPostVar() . '[' . $i . '][';
+                    if (strpos($org_post_var, '[') !== false) {
+                        $post_var .= strstr($input->getPostVar(), '[', true) . '][' . strstr($org_post_var, '[');
                     } else {
-                        $post_var .= $org_post_var . "]";
+                        $post_var .= $org_post_var . ']';
                     }
                     $input->setPostVar($post_var);
 
@@ -137,15 +167,23 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         $this->inputs_generated = null;
     }
 
+    /**
+     * @return int
+     */
     public function getShowInputLabel() : int
     {
         return $this->show_input_label;
     }
 
+    /**
+     * @param int $show_input_label
+     * @return void
+     */
     public function setShowInputLabel(int $show_input_label): void
     {
         $this->show_input_label = $show_input_label;
     }
+
     /**
      * @throws ilTemplateException
      */
@@ -153,6 +191,7 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
     {
         return $this->render();
     }
+
     /**
      * @throws ilTemplateException
      */
@@ -161,6 +200,10 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         return $this->render();
     }
 
+    /**
+     * @param bool $need_one_line_at_least
+     * @return array|array[]
+     */
     public function getValue(bool $need_one_line_at_least = false) : array
     {
         $values = $this->value;
@@ -172,6 +215,10 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         return $values;
     }
 
+    /**
+     * @param array $value
+     * @return void
+     */
     public function setValue(array $value): void
     {
         if (is_array($value)) {
@@ -181,20 +228,33 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         }
     }
 
+    /**
+     * @param ilTemplate $tpl
+     * @return void
+     * @throws \ilSystemStyleException
+     * @throws ilTemplateException
+     */
     public function insert(ilTemplate $tpl): void
     {
         $html = $this->render();
 
-        $tpl->setCurrentBlock("prop_generic");
-        $tpl->setVariable("PROP_GENERIC", $html);
+        $tpl->setCurrentBlock('prop_generic');
+        $tpl->setVariable('PROP_GENERIC', $html);
         $tpl->parseCurrentBlock();
     }
 
+    /**
+     * @return bool
+     */
     public function isShowSort() : bool
     {
         return $this->show_sort;
     }
 
+    /**
+     * @param bool $show_sort
+     * @return void
+     */
     public function setShowSort(bool $show_sort): void
     {
         $this->show_sort = $show_sort;
@@ -216,15 +276,15 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
             true
         );
 
-        $tpl->setVariable("COUNTER", htmlspecialchars($counter));
+        $tpl->setVariable('COUNTER', htmlspecialchars($counter));
 
         $remove_first_line = (!$this->getRequired() && empty($this->getValue(false)));
-        $tpl->setVariable("REMOVE_FIRST_LINE", htmlspecialchars($remove_first_line));
-        $tpl->setVariable("REQUIRED", htmlspecialchars($this->getRequired()));
-        $tpl->setVariable("SHOW_INPUT_LABEL", htmlspecialchars($this->getShowInputLabel()));
+        $tpl->setVariable('REMOVE_FIRST_LINE', htmlspecialchars($remove_first_line));
+        $tpl->setVariable('REQUIRED', htmlspecialchars($this->getRequired()));
+        $tpl->setVariable('SHOW_INPUT_LABEL', htmlspecialchars($this->getShowInputLabel()));
 
         if (!$this->getRequired()) {
-            $tpl->setCurrentBlock("add_first_line");
+            $tpl->setCurrentBlock('add_first_line');
 
             if (!empty($this->getInputs())) {
                 $hiddenInputGUI = new ilTemplate(
@@ -236,17 +296,17 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                     true
                 );
 
-                $tpl->setVariable("HIDE_ADD_FIRST_LINE", $hiddenInputGUI->get());
+                $tpl->setVariable('HIDE_ADD_FIRST_LINE', $hiddenInputGUI->get());
             }
 
-            $tpl->setVariable("ADD_FIRST_LINE", $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->add()->withAdditionalOnLoadCode(function (string $id) use ($counter) : string {
+            $tpl->setVariable('ADD_FIRST_LINE', $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->add()->withAdditionalOnLoadCode(function (string $id) use ($counter) : string {
                 return 'il.MultiLineNewInputGUI.init(' . $counter . ', $("#' . $id . '").parent().parent().parent(), true)';
             })));
 
             $tpl->parseCurrentBlock();
         }
 
-        $tpl->setCurrentBlock("line");
+        $tpl->setCurrentBlock('line');
 
         foreach ($this->getInputs() as $i => $inputs) {
             if ($remove_first_line) {
@@ -259,10 +319,10 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                     true
                 );
 
-                $tpl->setVariable("HIDE_LINE", $hiddenInputGUI->get());
+                $tpl->setVariable('HIDE_LINE', $hiddenInputGUI->get());
             }
 
-            $tpl->setVariable("INPUTS", Items::renderInputs($inputs));
+            $tpl->setVariable('INPUTS', Items::renderInputs($inputs));
 
             if ($this->isShowSort()) {
                 $sort_tpl = new ilTemplate(
@@ -274,7 +334,7 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                     true
                 );
 
-                $sort_tpl->setVariable("UP", $this->ui->renderer()->render($this->glyph_factory->sortAscending()));
+                $sort_tpl->setVariable('UP', $this->ui->renderer()->render($this->glyph_factory->sortAscending()));
                 if ($i === 0) {
                     $hiddenInputGUI = new ilTemplate(
                         'multi_line_new_input_gui_hide.html',
@@ -285,10 +345,10 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                         true
                     );
 
-                    $sort_tpl->setVariable("HIDE_UP", $hiddenInputGUI->get());
+                    $sort_tpl->setVariable('HIDE_UP', $hiddenInputGUI->get());
                 }
 
-                $sort_tpl->setVariable("DOWN", $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->sortDescending()));
+                $sort_tpl->setVariable('DOWN', $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->sortDescending()));
                 if ($i === (count($this->getInputs()) - 1)) {
                     $hiddenInputGUI = new ilTemplate(
                         'multi_line_new_input_gui_hide.html',
@@ -298,20 +358,20 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                         \ilGlobalTemplateInterface::DEFAULT_BLOCK,
                         true
                     );
-                    $sort_tpl->setVariable("HIDE_DOWN", $hiddenInputGUI->get());
+                    $sort_tpl->setVariable('HIDE_DOWN', $hiddenInputGUI->get());
                 }
 
-                $tpl->setVariable("SORT", $sort_tpl->get());
+                $tpl->setVariable('SORT', $sort_tpl->get());
             }
 
-            $tpl->setVariable("ADD", $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->add()->withAdditionalOnLoadCode(function (string $id) use ($i, $counter) : string {
+            $tpl->setVariable('ADD', $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->add()->withAdditionalOnLoadCode(function (string $id) use ($i, $counter) : string {
                 return 'il.MultiLineNewInputGUI.init(' . $counter . ', $("#' . $id . '").parent().parent().parent())' . ($i === (count($this->getInputs()) - 1) ? ';il.MultiLineNewInputGUI.update('
                         . $counter . ', $("#'
                         . $id
                         . '").parent().parent().parent().parent())' : '');
             })));
 
-            $tpl->setVariable("REMOVE", $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->remove()));
+            $tpl->setVariable('REMOVE', $this->ui->renderer()->render($this->ui->factory()->symbol()->glyph()->remove()));
             if ($this->getRequired() && count($this->getInputs()) < 2) {
                 $hiddenInputGUI = new ilTemplate(
                     'multi_line_new_input_gui_hide.html',
@@ -321,7 +381,7 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
                     \ilGlobalTemplateInterface::DEFAULT_BLOCK,
                     true
                 );
-                $tpl->setVariable("HIDE_REMOVE", $hiddenInputGUI->get());
+                $tpl->setVariable('HIDE_REMOVE', $hiddenInputGUI->get());
             }
 
             $tpl->parseCurrentBlock();
@@ -330,6 +390,10 @@ class MultiLineNewInputGUI extends ilFormPropertyGUI implements ilTableFilterIte
         return $tpl->get();
     }
 
+    /**
+     * @param array $values
+     * @return void
+     */
     public function setValueByArray(array $values): void
     {
         if(array_key_exists($this->getPostVar(), $values)) {

@@ -7,11 +7,16 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 
 class LearningObjectiveSuggestion extends \ActiveRecord
 {
-    public const TABLE_NAME = "alo_suggestion";
+    public const string TABLE_NAME = 'alo_suggestion';
+
+    /**
+     * @return string
+     */
     public function getConnectorContainerName(): string
     {
         return self::TABLE_NAME;
     }
+
     /**
      * @deprecated
      */
@@ -19,6 +24,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
     {
         return self::TABLE_NAME;
     }
+
     /**
      * @var int
      *
@@ -29,6 +35,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_sequence     true
      */
     protected ?int $id;
+
     /**
      * @var int
      *
@@ -38,6 +45,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_index        true
      */
     protected int $user_id;
+
     /**
      * @var int
      *
@@ -47,6 +55,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_index        true
      */
     protected int $course_obj_id;
+
     /**
      * @var int
      *
@@ -56,6 +65,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_index        true
      */
     protected int $objective_id;
+
     /**
      * @var int
      *
@@ -64,6 +74,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_length       8
      */
     protected int $sort;
+
     /**
      * @var string
      *
@@ -71,6 +82,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_fieldtype    timestamp
      */
     protected ?string $created_at = null;
+
     /**
      * @var string
      *
@@ -78,6 +90,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_fieldtype    timestamp
      */
     protected ?string $updated_at = null;
+
     /**
      * @var int
      *
@@ -86,6 +99,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_length       8
      */
     protected ?int $created_user_id = null;
+
     /**
      * @var int
      *
@@ -94,6 +108,7 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_length       8
      */
     protected ?int $updated_user_id = null;
+
     /**
      * @var int
      *
@@ -103,6 +118,10 @@ class LearningObjectiveSuggestion extends \ActiveRecord
      * @db_length       1
      */
     protected int $is_calculation_active = 1;
+
+    /**
+     * @return void
+     */
     public function create(): void
     {
         global $DIC;
@@ -111,6 +130,10 @@ class LearningObjectiveSuggestion extends \ActiveRecord
         $this->created_user_id = $ilUser->getId();
         parent::create();
     }
+
+    /**
+     * @return void
+     */
     public function update(): void
     {
         global $DIC;
@@ -128,70 +151,145 @@ class LearningObjectiveSuggestion extends \ActiveRecord
 
         parent::update();
     }
+
+    /**
+     * @return int
+     */
     public function getId(): int
     {
         return $this->id;
     }
+
+    /**
+     * @return int
+     */
     public function getSort(): int
     {
         return $this->sort;
     }
+
+    /**
+     * @param int $sort
+     * @return void
+     */
     public function setSort(int $sort): void
     {
         $this->sort = $sort;
     }
+
+    /**
+     * @return string
+     */
     public function getCreatedAt(): string
     {
         return $this->created_at;
     }
+
+    /**
+     * @param string $created_at
+     * @return void
+     */
     public function setCreatedAt(string $created_at): void
     {
         $this->created_at = $created_at;
     }
+
+    /**
+     * @return string
+     */
     public function getUpdatedAt(): string
     {
         return $this->updated_at;
     }
+
+    /**
+     * @param string $updated_at
+     * @return void
+     */
     public function setUpdatedAt(string $updated_at): void
     {
         $this->updated_at = $updated_at;
     }
+
+    /**
+     * @return int
+     */
     public function getCreatedUserId(): int
     {
         return $this->created_user_id;
     }
+
+    /**
+     * @return int
+     */
     public function getUpdatedUserId(): int
     {
         return $this->updated_user_id;
     }
+
+    /**
+     * @return int
+     */
     public function getUserId(): int
     {
         return $this->user_id;
     }
+
+    /**
+     * @param int $user_id
+     * @return void
+     */
     public function setUserId(int $user_id): void
     {
         $this->user_id = $user_id;
     }
+
+    /**
+     * @return int
+     */
     public function getCourseObjId(): int
     {
         return $this->course_obj_id;
     }
+
+    /**
+     * @param int $course_obj_id
+     * @return void
+     */
     public function setCourseObjId(int $course_obj_id): void
     {
         $this->course_obj_id = $course_obj_id;
     }
+
+    /**
+     * @return int
+     */
     public function getObjectiveId(): int
     {
         return $this->objective_id;
     }
+
+    /**
+     * @param int $objective_id
+     * @return void
+     */
     public function setObjectiveId(int $objective_id): void
     {
         $this->objective_id = $objective_id;
     }
+
+    /**
+     * @return int
+     */
     public function getIsCalculationActive(): int
     {
         return $this->is_calculation_active;
     }
+
+    /**
+     * @param int $is_calculation_active
+     * @return void
+     */
     public function setIsCalculationActive(int $is_calculation_active): void
     {
         $this->is_calculation_active = $is_calculation_active;

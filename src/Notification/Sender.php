@@ -10,9 +10,13 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 class Sender
 {
     protected string $subject;
+
     protected string $body;
+
     protected LearningObjectiveCourse $course;
+
     protected User $user;
+
     protected Log $log;
 
     /**
@@ -26,18 +30,32 @@ class Sender
         $this->user = $user;
         $this->log = $log;
     }
+
+    /**
+     * @param string $subject
+     * @return $this
+     */
     public function subject(string $subject): static
     {
         $this->subject = $subject;
 
         return $this;
     }
+
+    /**
+     * @param string $body
+     * @return $this
+     */
     public function body(string $body): static
     {
         $this->body = $body;
 
         return $this;
     }
+
+    /**
+     * @return bool
+     */
     public function send(): bool
     {
         $config = new CourseConfigProvider($this->course);
@@ -61,6 +79,11 @@ class Sender
             return false;
         }
     }
+
+    /**
+     * @param int $role_id
+     * @return \ilObjRole
+     */
     protected function getRole(int $role_id): \ilObjRole
     {
         static $cache = array();
@@ -72,6 +95,10 @@ class Sender
 
         return $role;
     }
+
+    /**
+     * @return Notification|\ActiveRecord
+     */
     protected function getNotification(): Notification|\ActiveRecord
     {
         $notification = Notification::where(array(

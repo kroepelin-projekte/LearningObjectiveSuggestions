@@ -9,14 +9,27 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgram;
 class CourseConfigProvider
 {
     protected LearningObjectiveCourse $course;
+
+    /**
+     * @param LearningObjectiveCourse $course
+     */
     public function __construct(LearningObjectiveCourse $course)
     {
         $this->course = $course;
     }
+
+    /**
+     * @return LearningObjectiveCourse
+     */
     public function getCourse(): LearningObjectiveCourse
     {
         return $this->course;
     }
+
+    /**
+     * @param string $key
+     * @return string|null
+     */
     public function get(string $key): ?string
     {
         /** @var CourseConfig $config */
@@ -26,6 +39,10 @@ class CourseConfigProvider
         ))->first();
         return ($config) ? $config->getValue() : null;
     }
+
+    /**
+     * @return void
+     */
     public function delete(): void
     {
         /** @var CourseConfig $config */
@@ -35,6 +52,12 @@ class CourseConfigProvider
             $course_config->delete();
         }
     }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @return void
+     */
     public function set(string $key, string $value): void
     {
         global $ilLog;
@@ -52,46 +75,93 @@ class CourseConfigProvider
         $config->setValue($value);
         $config->save();
     }
+
+    /**
+     * @return int
+     */
     public function getMaxSuggestions(): int
     {
         return (int) $this->get('max_amount_suggestions');
     }
+
+    /**
+     * @return int
+     */
     public function getMinSuggestions(): int
     {
         return (int) $this->get('min_amount_suggestions');
     }
+
+    /**
+     * @param LearningObjective $learning_objective
+     * @param StudyProgram      $study_program
+     * @return int|string|null
+     */
     public function getWeightRough(LearningObjective $learning_objective, StudyProgram $study_program): int|string|null
     {
         return $this->get('weight_rough_' . $learning_objective->getId() . '_' . $study_program->getId());
     }
+
+    /**
+     * @param LearningObjective $learning_objective
+     * @return string
+     */
     public function getWeightFine(LearningObjective $learning_objective): string
     {
         return $this->get('weight_fine_' . $learning_objective->getId());
     }
+
+    /**
+     * @return int
+     */
     public function getBias(): int
     {
         return (int) $this->get('bias');
     }
+
+    /**
+     * @return int
+     */
     public function getOffset(): int
     {
         return (int) $this->get('offset');
     }
+
+    /**
+     * @return int
+     */
     public function getSteps(): int
     {
         return (int) $this->get('steps');
     }
+
+    /**
+     * @return string
+     */
     public function getEmailSubjectTemplate(): string
     {
         return (string) $this->get('email_subject');
     }
+
+    /**
+     * @return string
+     */
     public function getEmailBodyTemplate(): string
     {
         return (string) $this->get('email_body');
     }
+
+    /**
+     * @return bool
+     */
     public function getIsCalculationInactive(): bool
     {
         return (bool) $this->get('is_calculation_inactive');
     }
+
+    /**
+     * @return string
+     */
     public function getRoleAssignmentConfig(): string
     {
         return $this->get('role_assignment_config') ?? '';
