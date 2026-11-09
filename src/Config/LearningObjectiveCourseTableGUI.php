@@ -93,10 +93,11 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
         $this->ui_renderer = $DIC->ui()->renderer();
         $this->pl = ilLearningObjectiveSuggestionsPlugin::getInstance();
 
-        // All row actions point to the configure command, which dispatches them via handleTableAction()
+        // All row actions point to the CSRF protected handleTableAction command (the link carries the token),
+        // which dispatches them via handleTableAction()
         $target = (new DataFactory())->uri(
             ilUtil::_getHttpPath() . '/'
-            . $this->ctrl->getLinkTarget($this->parent_obj, ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE)
+            . $this->ctrl->getLinkTarget($this->parent_obj, ilLearningObjectiveSuggestionsConfigGUI::CMD_HANDLE_TABLE_ACTION)
         );
         [$this->url_builder, $this->action_token, $this->row_id_token] = (new URLBuilder($target))->acquireParameters(
             self::PARAMETER_NAMESPACE,

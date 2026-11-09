@@ -20,7 +20,7 @@ use JetBrains\PhpStorm\NoReturn;
  * @ilCtrl_IsCalledBy  ilLearningObjectiveSuggestionsConfigGUI: ilObjComponentSettingsGUI
  * @author Stefan Wanzenried <sw@studer-raimann.ch>
  */
-class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
+class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implements ilCtrlSecurityInterface
 {
     public const string CMD_ADD_COURSE = 'addCourse';
 
@@ -53,6 +53,43 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
     public const string CMD_DEACTIVATE_CALCULATION = 'deactivateCalculation';
 
     public const string CMD_ACTIVATE_CALCULATION = 'activateCalculation';
+
+    public const string CMD_SAVE_MAIN_CONFIG = 'saveMainConfig';
+
+    public const string CMD_HANDLE_TABLE_ACTION = 'handleTableAction';
+
+    /**
+     * Only these commands may be dispatched by performCommand()
+     */
+    private const array ALLOWED_COMMANDS = [
+        self::CMD_CONFIGURE,
+        self::CMD_ADD_COURSE,
+        self::CMD_SAVE_COURSE,
+        self::CMD_CANCEL,
+        self::CMD_CONFIGURE_COURSE,
+        self::CMD_SAVE_MAIN_CONFIG,
+        self::CMD_SAVE_ROLES,
+        self::CMD_CONFIGURE_NOTIFICATIONS,
+        self::CMD_SAVE_NOTIFICATIONS,
+        self::CMD_CONFIRM_DELETE_COURSE_CONFIG,
+        self::CMD_DELETE_COURSE,
+        self::CMD_DOWNLOAD_SUGGESTIONS,
+        self::CMD_ACTIVATE_CALCULATION,
+        self::CMD_DEACTIVATE_CALCULATION,
+        self::CMD_LEARNING_SUGGESTIONS_GENERATE,
+        self::CMD_HANDLE_TABLE_ACTION,
+    ];
+
+    /**
+     * GET commands that change data; ilCtrl adds a CSRF token to their links and rejects requests without it
+     */
+    private const array UNSAFE_GET_COMMANDS = [
+        self::CMD_DELETE_COURSE,
+        self::CMD_ACTIVATE_CALCULATION,
+        self::CMD_DEACTIVATE_CALCULATION,
+        self::CMD_LEARNING_SUGGESTIONS_GENERATE,
+        self::CMD_HANDLE_TABLE_ACTION,
+    ];
 
     public const string TAB_CONFIGURE_COURSE = 'configureCourse';
 
@@ -91,8 +128,67 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
      */
     public function performCommand(string $cmd): void
     {
+        global $DIC;
+
+        // Core only checks read permission on the plugin administration before forwarding to this GUI
+        if (!$this->hasWritePermission()) {
+            $DIC['ilErr']->raiseError($DIC->language()->txt('no_permission'), $DIC['ilErr']->WARNING);
+            return;
+        }
+
+        if (!in_array($cmd, self::ALLOWED_COMMANDS, true)) {
+            $cmd = self::CMD_CONFIGURE;
+        }
+
         $this->ctrl->saveParameter($this, 'course_ref_id');
         $this->$cmd();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getUnsafeGetCommands(): array
+    {
+        return self::UNSAFE_GET_COMMANDS;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getSafePostCommands(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasWritePermission(): bool
+    {
+        global $DIC;
+
+        foreach (array_keys(ilObject::_getObjectsByType('cmps')) as $obj_id) {
+            foreach (ilObject::_getAllReferences((int) $obj_id) as $ref_id) {
+                if ($DIC->rbac()->system()->checkAccess('write', (int) $ref_id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Target of the course table's row actions, CSRF protected (see UNSAFE_GET_COMMANDS)
+     *
+     * @return void
+     * @throws ilCtrlException
+     */
+    protected function handleTableAction(): void
+    {
+        $table = new LearningObjectiveCourseTableGUI($this);
+        $table->handleTableAction();
+        $this->ctrl->redirect($this, self::CMD_CONFIGURE);
     }
 
     /**
@@ -101,7 +197,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI
     protected function configure(): void
     {
         $table = new LearningObjectiveCourseTableGUI($this);
-        $table->handleTableAction();
 
         $button = ilLinkButton::getInstance();
         $button->setCaption($this->pl->txt("add_course"), false);
