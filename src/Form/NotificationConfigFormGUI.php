@@ -11,6 +11,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Parser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Placeholders;
 use ILIAS\UI\Factory;
 use ilCtrlInterface;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 
 class NotificationConfigFormGUI
 {
@@ -148,10 +149,17 @@ class NotificationConfigFormGUI
         ) {
             $form = $form->withRequest($request);
             $data = $form->getData();
+            $tpl = $DIC->ui()->mainTemplate();
 
-            if (empty($data['configuration']) || empty($data['templates'])) {
-                $tpl = $DIC->ui()->mainTemplate();
+            $placeholders = new Placeholders();
+            $available_placeholders = $placeholders->getAvailablePlaceholders();
+            $twig_parser = new TwigParser();
+
+            if (empty($data) || empty($data['configuration']) || empty($data['templates']) ||
+                !$twig_parser->isValid($data['templates']['email_body'], $available_placeholders)
+            ) {
                 $tpl->setOnScreenMessage('failure', $this->pl->txt('something_went_wrong'), true);
+                $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
             }
 
             foreach ($data['configuration'] as $key => $value) {
@@ -161,8 +169,6 @@ class NotificationConfigFormGUI
             foreach ($data['templates'] as $key => $value) {
                 $config->set($key, $value);
             }
-
-            $tpl = $DIC->ui()->mainTemplate();
             $tpl->setOnScreenMessage('success', $this->pl->txt('saved'), true);
         }
     }

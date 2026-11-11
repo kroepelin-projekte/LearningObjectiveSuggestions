@@ -70,3 +70,7 @@ learning_suggestions_generated#:#Learning Suggestion Generated
 saved#:#Saved
 ref_id_not_a_course#:#The given Ref-ID does not belong to a course.
 something_went_wrong#:#Something went wrong
+initial_test_missing#:#Inital Test is missing for refId:
+min_points#:#min_points
+max_points#:#max_points
+role#:#role

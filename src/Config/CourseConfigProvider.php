@@ -60,13 +60,11 @@ class CourseConfigProvider
      */
     public function set(string $key, string $value): void
     {
-        global $ilLog;
-        $ilLog->write($key . " " . $value);
-
         $config = CourseConfig::where(array(
             'cfg_key' => $key,
             'course_obj_id' => $this->course->getId(),
         ))->first();
+
         if ($config === null) {
             $config = new CourseConfig();
             $config->setKey($key);

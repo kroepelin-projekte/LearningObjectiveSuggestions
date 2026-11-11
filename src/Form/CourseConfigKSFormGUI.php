@@ -14,22 +14,22 @@ class CourseConfigKSFormGUI
 {
     private ?CourseConfigProvider $config;
 
-    private $ctrl;
+    private \ilCtrlInterface $ctrl;
 
-    private $ui;
+    private \ILIAS\UI\Factory $ui;
 
-    private $pl;
+    private \ilLearningObjectiveSuggestionsPlugin $pl;
 
-    private $objectives;
+    private ?array $objectives;
 
     private ?array $udf_definition;
 
     private ?StudyProgramQuery $study_program_query;
 
     public function __construct(
-        $pl,
+        \ilLearningObjectiveSuggestionsPlugin $pl,
         ?CourseConfigProvider $config = null,
-        $objectives = null,
+        ?array $objectives = null,
         ?StudyProgramQuery $study_program_query = null,
         ?array $udf_definition = null
     ) {
@@ -86,7 +86,7 @@ class CourseConfigKSFormGUI
         }
 
         return $this->ui->input()->container()->form()->standard(
-            $this->ctrl->getFormAction(new ilLearningObjectiveSuggestionsConfigGUI(), 'saveMainConfig'),
+            $this->ctrl->getFormActionByClass(ilLearningObjectiveSuggestionsConfigGUI::class, 'saveMainConfig'),
             $all_sections
         );
     }
@@ -121,7 +121,7 @@ class CourseConfigKSFormGUI
         foreach ($this->objectives as $objective) {
             $key = 'weight_fine_' . $objective->getId();
 
-            $input = $field->numeric($objective->getTitle())
+            $input = $field->numeric(htmlspecialchars($objective->getTitle()))
                            ->withRequired(true)
                            ->withStepSize(0.01) // allows decimals; adjust precision as needed
                            ->withDedicatedName($key);
@@ -158,7 +158,7 @@ class CourseConfigKSFormGUI
         foreach ($objectives as $objective) {
             $key = 'weight_rough_' . $objective->getId() . '_' . $study_program->getId();
             $value = $this->config->get($key);
-            $inputs[$key] = $field->numeric($objective->getTitle())
+            $inputs[$key] = $field->numeric(htmlspecialchars($objective->getTitle()))
                                   ->withRequired(true)
                                   ->withStepSize(0.01)
                                   ->withDedicatedName($key)
@@ -168,7 +168,7 @@ class CourseConfigKSFormGUI
         if (empty($inputs)) {
             return null;
         }
-        return $field->section($inputs, $this->pl->txt('weight_rough') . ' ' . $study_program->gettitle());
+        return $field->section($inputs, $this->pl->txt('weight_rough') . ' ' . htmlspecialchars($study_program->gettitle()));
     }
 
     /**
@@ -216,13 +216,16 @@ class CourseConfigKSFormGUI
         $form = $form->withRequest($request);
         $data = $form->getData();
 
-        if ($data === null) {
+        if ($data === null || ($data['udf_id_study_program']['udf_id_study_program'] === null ||
+                (isset($data['udf_id_study_program']['udf_id_study_program'][0]) &&
+                    $data['udf_id_study_program']['udf_id_study_program'][0] === ''))
+        ) {
             // getData() is null as soon as one input fails validation, the
             // messages are attached to the inputs and shown when the form is rendered
             $errors = $this->collectErrors($form->getInputs());
             $tpl->setOnScreenMessage(
                 'failure',
-                $DIC->language()->txt('form_input_not_valid') . ($errors !== [] ? '<br>' . implode('<br>', $errors) : '')
+                $DIC->language()->txt('form_input_not_valid') . ($errors !== [] ? '<br>' . htmlspecialchars(implode('<br>', $errors)) : '')
             );
             return $form;
         }
@@ -277,13 +280,7 @@ class CourseConfigKSFormGUI
 
         $ref_id = $field->text($this->pl->txt('ref_id'), $this->pl->txt('ref_id_info'))
                         ->withRequired(true)
-                        ->withDedicatedName('ref_id')
-                        /*->withAdditionalTransformation(
-                            $DIC->refinery()->custom()->constraint(
-                                fn(?int $id): bool => $id !== null && \ilObject::_lookupType($id, true) === 'crs',
-                                $this->pl->txt('ref_id_not_a_course')
-                            )
-                        )*/;
+                        ->withDedicatedName('ref_id');
 
         $section = $field->section(
             ['ref_id' => $ref_id],
@@ -291,7 +288,8 @@ class CourseConfigKSFormGUI
         );
 
         return $factory->input()->container()->form()->standard(
-            $this->ctrl->getFormAction(new ilLearningObjectiveSuggestionsConfigGUI(), 'saveCourse'),
+            $this->ctrl->getFormActionByClass(ilLearningObjectiveSuggestionsConfigGUI::class, 'saveCourse'),
+
             ['course' => $section]
         )->withSubmitLabel($this->pl->txt('save'));
     }

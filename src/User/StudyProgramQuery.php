@@ -3,10 +3,6 @@
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User;
 
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
-use ilObjUser;
-use Leifos\CascadingSelect\DataObjects\Parser as CascadingSelectParser;
-use Leifos\CascadingSelect\Service\Container as CascadingSelectContainer;
-use ILIAS\Mail\RecipientSearch\UserSearchAutocompleteItemResult;
 
 class StudyProgramQuery
 {
@@ -73,8 +69,12 @@ class StudyProgramQuery
     {
         global $DIC;
 
-        // TODO FIx it
-        $id = (string) $this->config->get('udf_id_study_program');
+        $udf_id_study_programm = $this->config->get('udf_id_study_program');
+
+        if (empty($udf_id_study_programm)) {
+            return null;
+        }
+        $id = (string) $udf_id_study_programm;
 
         // Validate that $id is not integer. In ILIAS11 it's UUID
         if (!ctype_digit($id)) {
@@ -113,7 +113,6 @@ class StudyProgramQuery
 
         // Check if field is of type CascadingSelect
         if (!$this->isCascadingSelect($study_program_field_id)) {
-            // TODO test this case, wehn it happens?????
             $data = json_decode($field_values, true)
                 ?? unserialize($field_values, ['allowed_classes' => false])
                 ?: [];
@@ -161,8 +160,11 @@ class StudyProgramQuery
      * @param string $study_program_field_id
      * @return string
      */
-    protected function getFieldValues(string $study_program_field_id): string
+    protected function getFieldValues(?string $study_program_field_id = null): string
     {
+        if ($study_program_field_id == null) {
+            return '';
+        }
         $udf_definition = $this->getUdfDefinition($study_program_field_id);
 
         return (string) ($udf_definition['field_values'] ?? '');
