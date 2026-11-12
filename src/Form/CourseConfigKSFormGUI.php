@@ -222,10 +222,13 @@ class CourseConfigKSFormGUI
         ) {
             // getData() is null as soon as one input fails validation, the
             // messages are attached to the inputs and shown when the form is rendered
-            $errors = $this->collectErrors($form->getInputs());
+            $errors = array_map(
+                static fn($error): string => htmlspecialchars((string) $error, ENT_QUOTES),
+                $this->collectErrors($form->getInputs())
+            );
             $tpl->setOnScreenMessage(
                 'failure',
-                $DIC->language()->txt('form_input_not_valid') . ($errors !== [] ? '<br>' . htmlspecialchars(implode('<br>', $errors)) : '')
+                $DIC->language()->txt('form_input_not_valid') . ($errors !== [] ? '<br>' . implode('<br>', $errors) : '')
             );
             return $form;
         }

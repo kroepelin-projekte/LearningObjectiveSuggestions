@@ -49,7 +49,7 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
         self::ACTION_DEACTIVATE => ilLearningObjectiveSuggestionsConfigGUI::CMD_DEACTIVATE_CALCULATION,
     ];
 
-    protected object $parent_obj;
+    protected ilLearningObjectiveSuggestionsConfigGUI $parent_obj;
 
     protected ilCtrlInterface $ctrl;
 
@@ -77,10 +77,10 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
     protected array $data = [];
 
     /**
-     * @param object $a_parent_obj
+     * @param ilLearningObjectiveSuggestionsConfigGUI $a_parent_obj
      * @throws \ilCtrlException
      */
-    public function __construct(object $a_parent_obj)
+    public function __construct(ilLearningObjectiveSuggestionsConfigGUI $a_parent_obj)
     {
         global $DIC;
 

@@ -285,8 +285,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         $this->ctrl->setParameter($this, 'cmd', self::CMD_CANCEL);
 
         $confirmation_gui->setCancel($this->pl->txt('cancel'), self::CMD_CANCEL, self::CMD_CANCEL);
-        $confirmation_gui->setHeaderText($this->pl->txt('confirm_delete_crs') . " " . $DIC->ui()->renderer()->render($DIC->ui()->factory()->link()
-                ->standard($this->pl->txt('download_suggestions'), $this->ctrl->getLinkTarget($this, self::CMD_DOWNLOAD_SUGGESTIONS))));
+        $confirmation_gui->setHeaderText($this->pl->txt('confirm_delete_crs'));
 
         $this->ctrl->clearParameterByClass(self::class, 'course_ref_id');
         $this->tpl->setContent($confirmation_gui->getHTML());
