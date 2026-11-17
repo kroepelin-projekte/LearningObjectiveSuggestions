@@ -40,10 +40,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     public const string CMD_CONFIGURE_NOTIFICATIONS = 'configureNotifications';
 
-    public const string CMD_CONFIGURE_NOTIFICATIONS_USERS_AUTOCOMPLETE = 'configureNotificationsUsersAutocomplete';
-
-    public const string CMD_CONFIGURE_NOTIFICATIONS_ROLES_AUTOCOMPLETE = 'configureNotificationsRolesAutocomplete';
-
     public const string CMD_SAVE_ROLES = 'saveRoles';
 
     public const string CMD_SAVE_COURSE = 'saveCourse';
