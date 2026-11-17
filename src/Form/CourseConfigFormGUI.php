@@ -17,11 +17,7 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
 
     protected LearningObjectiveQuery $objective_query;
 
-    protected StudyProgramQuery $study_program_query;
-
     protected \ilLearningObjectiveSuggestionsPlugin $pl;
-
-    private array $udf_definition;
 
     /**
      * @param CourseConfigProvider   $config
@@ -31,16 +27,12 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
      */
     public function __construct(
         CourseConfigProvider $config,
-        LearningObjectiveQuery $objective_query,
-        StudyProgramQuery $study_program_query,
-        array $udf_definition
+        LearningObjectiveQuery $objective_query
     ) {
         parent::__construct();
         $this->config = $config;
         $this->objective_query = $objective_query;
-        $this->study_program_query = $study_program_query;
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
-        $this->udf_definition = $udf_definition;
         $this->init();
     }
 
@@ -67,11 +59,11 @@ class CourseConfigFormGUI extends \ilPropertyFormGUI
 
         $item = new MultiLineNewInputGUI($this->pl->txt('role_assignment_config'), 'role_assignment_config');
 
-        $subitem = new NumberInputGUI('min_points', 'min_points');
+        $subitem = new NumberInputGUI($this->pl->txt('min_points'), 'min_points');
         $item->addInput($subitem);
-        $subitem = new NumberInputGUI('max_points', 'max_points');
+        $subitem = new NumberInputGUI($this->pl->txt('max_points'), 'max_points');
         $item->addInput($subitem);
-        $subitem = new ilSelectInputGUI('role', 'role');
+        $subitem = new ilSelectInputGUI($this->pl->txt('role'), 'role');
         $subitem->setOptions($this->getAllRoles());
         $item->addInput($subitem);
         $item->setRequired(true);

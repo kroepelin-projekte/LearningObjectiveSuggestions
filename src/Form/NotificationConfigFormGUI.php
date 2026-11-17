@@ -11,6 +11,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Parser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Placeholders;
 use ILIAS\UI\Factory;
 use ilCtrlInterface;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 
 class NotificationConfigFormGUI
 {
@@ -56,7 +57,8 @@ class NotificationConfigFormGUI
     {
         $field = $this->ui->input()->field();
 
-        $sender = $field->text($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
+        $sender = $field->numeric($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
+                        ->withStepSize(1)
                         ->withRequired(true)
                         ->withDedicatedName('notification_sender_user_id')
                         ->withValue((string) ($this->config->get('notification_sender_user_id') ?? ''));
@@ -73,7 +75,7 @@ class NotificationConfigFormGUI
             $this->pl->txt('configuration')
         );
 
-        $subject = $field->text($this->pl->txt('subject'))
+        $subject = $field->textarea($this->pl->txt('subject'))
                          ->withRequired(true)
                          ->withDedicatedName('email_subject')
                          ->withValue((string) ($this->config->get('email_subject') ?? ''));
@@ -148,10 +150,28 @@ class NotificationConfigFormGUI
         ) {
             $form = $form->withRequest($request);
             $data = $form->getData();
+            $tpl = $DIC->ui()->mainTemplate();
 
-            if (empty($data['configuration']) || empty($data['templates'])) {
-                $tpl = $DIC->ui()->mainTemplate();
+            if (isset($data['configuration']['notification_sender_user_id'])) {
+                $user_exists = \ilObject::_exists((int) $data['configuration']['notification_sender_user_id'], false, 'usr');
+
+                if (!$user_exists) {
+                    $tpl->setOnScreenMessage('failure', $this->pl->txt('not_existing_user'), true);
+                    $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
+
+                }
+            }
+
+            $placeholders = new Placeholders();
+            $available_placeholders = $placeholders->getAvailablePlaceholders();
+            $twig_parser = new TwigParser();
+
+            if (empty($data) || empty($data['configuration']) || empty($data['templates']) ||
+                !$twig_parser->isValid($data['templates']['email_body'], $available_placeholders) ||
+                !$twig_parser->isValid($data['templates']['email_subject'], $available_placeholders)
+            ) {
                 $tpl->setOnScreenMessage('failure', $this->pl->txt('something_went_wrong'), true);
+                $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
             }
 
             foreach ($data['configuration'] as $key => $value) {
@@ -161,8 +181,6 @@ class NotificationConfigFormGUI
             foreach ($data['templates'] as $key => $value) {
                 $config->set($key, $value);
             }
-
-            $tpl = $DIC->ui()->mainTemplate();
             $tpl->setOnScreenMessage('success', $this->pl->txt('saved'), true);
         }
     }
