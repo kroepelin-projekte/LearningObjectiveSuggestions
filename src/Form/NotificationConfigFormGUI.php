@@ -55,6 +55,8 @@ class NotificationConfigFormGUI
      */
     public function buidForm()
     {
+        global $DIC;
+
         $field = $this->ui->input()->field();
 
         $sender = $field->numeric($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
@@ -78,7 +80,8 @@ class NotificationConfigFormGUI
         $subject = $field->textarea($this->pl->txt('subject'))
                          ->withRequired(true)
                          ->withDedicatedName('email_subject')
-                         ->withValue((string) ($this->config->get('email_subject') ?? ''));
+                         ->withValue((string) ($this->config->get('email_subject') ?? ''))
+                         ->withAdditionalTransformation($DIC->refinery()->custom()->transformation(fn($v) => trim(preg_replace('/\R+/', ' ', $v))));
 
         $body = $field->textarea($this->pl->txt('body'), $this->pl->txt('body_info'))
                       ->withRequired(true)
@@ -158,7 +161,6 @@ class NotificationConfigFormGUI
                 if (!$user_exists) {
                     $tpl->setOnScreenMessage('failure', $this->pl->txt('not_existing_user'), true);
                     $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
-
                 }
             }
 
