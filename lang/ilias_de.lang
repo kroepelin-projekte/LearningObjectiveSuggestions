@@ -56,8 +56,7 @@ weight_fine#:#Feingewichte
 weight_rough#:#Grobgewichte
 calculation#:#Calculation Aktiv
 delete_learning_objective_course#:#Löschen
-confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht! Bitte laden Sie sich vorher noch die Empfehlungen herunter.
-download_suggestions#:#Empfehlungen herunterladen
+confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht!
 cancel#:#Abbrechen
 course_removed#:#Lernzielorientierter Kurs wurde entfernt.
 deactivate_calculation#:#Calculation deaktivieren

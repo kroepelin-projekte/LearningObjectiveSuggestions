@@ -56,8 +56,7 @@ weight_fine#:#Fine Weights
 weight_rough#:#Rough Weights
 calculation#:#Calculation Active
 delete_learning_objective_course#:#Delete
-confirm_delete_crs#:#Do you really want to delete the learning objective course? All data will be deleted! Please download the recommendations before.
-download_suggestions#:#Download Recommendations
+confirm_delete_crs#:#Do you really want to delete the learning objective course? All data will be deleted!
 cancel#:#Cancel
 course_removed#:#Learning objective course has been removed.
 deactivate_calculation#:#Deactivate Calculation

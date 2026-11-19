@@ -36,8 +36,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     public const string CMD_DELETE_COURSE = 'deleteCourse';
 
-    public const string CMD_DOWNLOAD_SUGGESTIONS = 'downloadSuggestions';
-
     public const string CMD_CONFIGURE_NOTIFICATIONS = 'configureNotifications';
 
     public const string CMD_CONFIGURE_NOTIFICATIONS_USERS_AUTOCOMPLETE = 'configureNotificationsUsersAutocomplete';
@@ -73,7 +71,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         self::CMD_SAVE_NOTIFICATIONS,
         self::CMD_CONFIRM_DELETE_COURSE_CONFIG,
         self::CMD_DELETE_COURSE,
-        self::CMD_DOWNLOAD_SUGGESTIONS,
         self::CMD_ACTIVATE_CALCULATION,
         self::CMD_DEACTIVATE_CALCULATION,
         self::CMD_LEARNING_SUGGESTIONS_GENERATE,
@@ -313,16 +310,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         $course_config->delete();
         $this->tpl->setOnScreenMessage('success', $this->pl->txt("course_removed"), true);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
-    }
-
-    /**
-     * @throws ilCtrlException
-     */
-    protected function downloadSuggestions(): void
-    {
-        $this->ctrl->setParameterByClass('alouiCourseGUI', 'alo_xpt', 1);
-        $this->ctrl->setParameterByClass('alouiCourseGUI', 'ref_id', $_GET['course_ref_id']);
-        $this->ctrl->redirectByClass([ 'ilUIPluginRouterGUI', 'alouiCourseGUI' ]);
     }
 
     /**
