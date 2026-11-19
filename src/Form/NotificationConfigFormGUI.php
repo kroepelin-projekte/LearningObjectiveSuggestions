@@ -12,6 +12,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\Placeholders;
 use ILIAS\UI\Factory;
 use ilCtrlInterface;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
+use ILIAS\Refinery\Factory as RefineryFactory;
 
 class NotificationConfigFormGUI
 {
@@ -31,6 +32,8 @@ class NotificationConfigFormGUI
 
     private ilCtrlInterface $ctrl;
 
+    private RefineryFactory $refinery;
+
     /**
      * @param CourseConfigProvider $config
      * @param Parser               $parser
@@ -46,6 +49,7 @@ class NotificationConfigFormGUI
         $this->lng = $DIC->language();
         $this->config = $config;
         $this->parser = $parser;
+        $this->refinery = $DIC->refinery();
         $this->pl = ilLearningObjectiveSuggestionsPlugin::getInstance();
     }
 
@@ -55,8 +59,6 @@ class NotificationConfigFormGUI
      */
     public function buidForm()
     {
-        global $DIC;
-
         $field = $this->ui->input()->field();
 
         $sender = $field->numeric($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
@@ -81,7 +83,7 @@ class NotificationConfigFormGUI
                          ->withRequired(true)
                          ->withDedicatedName('email_subject')
                          ->withValue((string) ($this->config->get('email_subject') ?? ''))
-                         ->withAdditionalTransformation($DIC->refinery()->custom()->transformation(fn($v) => trim(preg_replace('/\R+/', ' ', $v))));
+                         ->withAdditionalTransformation($this->refinery->custom()->constraint(fn(string $v): bool => $v !== '', $this->lng->txt('msg_input_is_required')));
 
         $body = $field->textarea($this->pl->txt('body'), $this->pl->txt('body_info'))
                       ->withRequired(true)
