@@ -4,13 +4,9 @@ namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\TabsIn
 
 use ilFormPropertyGUI;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\PropertyFormGUI\PropertyFormGUI;
-//use srag\DIC\LearningObjectiveSuggestions\DICTrait;
 
 class MultilangualTabsInputGUI
 {
-
-    //use DICTrait;
-
     /**
      * MultilangualTabsInputGUI constructor
      */
@@ -29,6 +25,7 @@ class MultilangualTabsInputGUI
      */
     public static function generate(array $items, bool $default_language = false, bool $default_required = true) : array
     {
+        $tabs = [];
         foreach (self::getLanguages($default_language) as $lang_key => $lang_title) {
             $tab_items = [];
 
@@ -45,8 +42,8 @@ class MultilangualTabsInputGUI
             $tab = [
                 PropertyFormGUI::PROPERTY_CLASS    => TabsInputGUITab::class,
                 PropertyFormGUI::PROPERTY_SUBITEMS => $tab_items,
-                "setTitle"                         => $lang_title,
-                "setActive"                        => ($lang_key === ($default_language ? "default" : self::dic()->language()->getLangKey()))
+                'setTitle'                         => $lang_title,
+                'setActive'                        => ($lang_key === ($default_language ? 'default' : self::dic()->language()->getLangKey()))
             ];
 
             $tabs[$lang_key] = $tab;
@@ -66,12 +63,12 @@ class MultilangualTabsInputGUI
     {
         foreach (self::getLanguages($default_language) as $lang_key => $lang_title) {
             $tab = new TabsInputGUITab($lang_title, $lang_key);
-            $tab->setActive($lang_key === ($default_language ? "default" : self::dic()->language()->getLangKey()));
+            $tab->setActive($lang_key === ($default_language ? 'default' : self::dic()->language()->getLangKey()));
 
             foreach ($inputs as $input) {
                 $tab_input = clone $input;
 
-                if ($default_required && $lang_key === "default") {
+                if ($default_required && $lang_key === 'default') {
                     $tab_input->setRequired(true);
                 }
 
@@ -93,10 +90,10 @@ class MultilangualTabsInputGUI
         $lang_keys = self::dic()->language()->getInstalledLanguages();
 
         if ($default) {
-            array_unshift($lang_keys, "default");
+            array_unshift($lang_keys, 'default');
         }
 
-        return array_combine($lang_keys, array_map("strtoupper", $lang_keys));
+        return array_combine($lang_keys, array_map('strtoupper', $lang_keys));
     }
 
 
@@ -108,7 +105,7 @@ class MultilangualTabsInputGUI
      *
      * @return mixed
      */
-    public static function getValueForLang(array $values,/*?*/ string $lang_key = null, string $sub_key = null, bool $use_default_if_not_set = true)
+    public static function getValueForLang(array $values, ?string $lang_key = null, ?string $sub_key = null, bool $use_default_if_not_set = true)
     {
         if (empty($lang_key)) {
             $lang_key = self::dic()->language()->getLangKey();
@@ -129,7 +126,7 @@ class MultilangualTabsInputGUI
         }
 
         if ($use_default_if_not_set) {
-            $value = $values["default"];
+            $value = $values['default'];
 
             if (!empty($sub_key)) {
                 if (!is_array($value)) {

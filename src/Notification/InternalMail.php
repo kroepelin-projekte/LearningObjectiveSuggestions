@@ -7,31 +7,61 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 class InternalMail
 {
     protected User $sender;
+
     protected User $receiver;
-    protected array $cc = array();
-    protected array $bcc = array();
+
+    protected array $cc = [];
+
+    protected array $bcc = [];
+
     protected string $subject = '';
+
     protected string $body = '';
+
+    /**
+     * @param string $subject
+     * @return $this
+     */
     public function subject(string $subject): static
     {
         $this->subject = $subject;
         return $this;
     }
+
+    /**
+     * @param string $body
+     * @return $this
+     */
     public function body(string $body): static
     {
         $this->body = $body;
         return $this;
     }
+
+    /**
+     * @param User $user
+     * @return $this
+     */
     public function from(User $user): static
     {
         $this->sender = $user;
         return $this;
     }
+
+    /**
+     * @param User $user
+     * @return $this
+     */
     public function to(User $user): static
     {
         $this->receiver = $user;
         return $this;
     }
+
+    /**
+     * @param User|\ilObjRole $user_or_role
+     * @return $this
+     */
     public function cc(User|\ilObjRole $user_or_role): static
     {
         if ($user_or_role instanceof User) {
@@ -41,6 +71,11 @@ class InternalMail
         }
         return $this;
     }
+
+    /**
+     * @param User|\ilObjRole $user_or_role
+     * @return $this
+     */
     public function bcc(User|\ilObjRole $user_or_role): static
     {
         if ($user_or_role instanceof User) {
@@ -50,6 +85,7 @@ class InternalMail
         }
         return $this;
     }
+
     /**
      * @throws \ilException
      */

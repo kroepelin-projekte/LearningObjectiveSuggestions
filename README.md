@@ -6,9 +6,11 @@ Based on the scores, learning objectives are suggested to a user for further lea
 ## Installation
 Start at your ILIAS root directory
 ```
-mkdir -p Customizing/global/plugins/Services/EventHandling/EventHook  
-cd Customizing/global/plugins/Services/EventHandling/EventHook
+mkdir -p public/Customizing/global/plugins/Services/EventHandling/EventHook  
+cd public/Customizing/global/plugins/Services/EventHandling/EventHook
 git clone https://git.studer-raimann.ch/ILIAS-Kunde-DHBW-Karlsruhe/LearningObjectiveSuggestions.git
+composer du
+php setup.php build
 ```
 As an ILIAS administrator, go to "Administration -> Plugins" and install/activate the plugin.
 

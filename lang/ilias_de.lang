@@ -56,8 +56,7 @@ weight_fine#:#Feingewichte
 weight_rough#:#Grobgewichte
 calculation#:#Calculation Aktiv
 delete_learning_objective_course#:#Löschen
-confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht! Bitte laden Sie sich vorher noch die Empfehlungen herunter.
-download_suggestions#:#Empfehlungen herunterladen
+confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht!
 cancel#:#Abbrechen
 course_removed#:#Lernzielorientierter Kurs wurde entfernt.
 deactivate_calculation#:#Calculation deaktivieren
@@ -67,3 +66,11 @@ role_assignment_config#:#Rollenzuweisung Konfiguration
 calculation#:#Berechnung
 learning_suggestion_generate#:#Learnemfehlungen Generieren
 learning_suggestions_generated#:#Learnemfehlungen wurden generiert
+saved#:#Gespeichert
+ref_id_not_a_course#:#Die angegebene Ref-ID gehört zu keinem Kurs.
+something_went_wrong#:#Etwas ist schiefgelaufen.
+initial_test_missing#:#Der Einstiegstest fehlt für refId
+min_points#:#Mindestpunkte
+max_points#:#Höchstpunkte
+role#:#Rolle
+not_existing_user#:#Es gibt keinen Benutzer mit dieser ID

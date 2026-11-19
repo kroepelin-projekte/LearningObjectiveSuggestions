@@ -8,11 +8,17 @@ use ilToolbarItem;
 
 class NumberInputGUI extends ilNumberInputGUI implements ilTableFilterItem, ilToolbarItem
 {
+    /**
+     * @return string
+     */
     public function getTableFilterHTML() : string
     {
         return $this->render();
     }
 
+    /**
+     * @return string
+     */
     public function getToolbarHTML() : string
     {
         return $this->render();

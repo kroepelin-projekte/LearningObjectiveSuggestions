@@ -22,8 +22,11 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfig;
 class CalculateScoresAndSuggestions
 {
     protected \ilDBInterface $db;
+
     protected ConfigProvider $config;
+
     protected Log $log;
+
     protected \ilLearningObjectiveSuggestionsPlugin $pl;
 
     /**
@@ -38,20 +41,31 @@ class CalculateScoresAndSuggestions
         $this->log = $log;
         $this->pl = \ilLearningObjectiveSuggestionsPlugin::getInstance();
     }
+
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return bool
+     */
     public function run(LearningObjectiveCourse $course, User $user): bool
     {
-        $hasAtLeastOneUpdate = false;
+        $has_at_least_one_update = false;
 
         if ($course->getIsCalculationInactive()) {
-            return $hasAtLeastOneUpdate;
+            return $has_at_least_one_update;
         }
         if ($this->runForUser($course, $user)) {
-            $hasAtLeastOneUpdate = true;
+            $has_at_least_one_update = true;
         }
 
-        return $hasAtLeastOneUpdate;
+        return $has_at_least_one_update;
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return bool
+     */
     protected function runForUser(LearningObjectiveCourse $course, User $user): bool
     {
         $config = new CourseConfigProvider($course);
@@ -77,7 +91,7 @@ class CalculateScoresAndSuggestions
             return false;
         }
 
-        $atLeastOneActionDone = false;
+        $atLeast_one_action_done = false;
 
         foreach ($objective_results as $objective_result) {
             $score = $this->getLearningObjectiveScore($objective_result);
@@ -89,30 +103,30 @@ class CalculateScoresAndSuggestions
             $calculator = new LearningObjectiveScoreCalculator($config, $study_program_query, $this->log);
 
             try {
-                $calculatedScore = $calculator->calculate($objective_result);
-                if ($calculatedScore == -1) {
+                $calculated_score = $calculator->calculate($objective_result);
+                if ($calculated_score == -1) {
                     continue;
                 }
 
-                $score->setScore($calculatedScore);
+                $score->setScore($calculated_score);
                 $score->save();
             } catch (\Exception $e) {
-                $this->log->write("Exception when trying to calculate the score");
+                $this->log->write('Exception when trying to calculate the score');
                 $this->log->write($e->getMessage());
                 $this->log->write($e->getTraceAsString());
             }
         }
 
         $generator = new LearningObjectiveSuggestionGenerator($config, $learning_objective_query, $this->log);
-        $currentScores = $this->getScores($course, $user);
+        $current_scores = $this->getScores($course, $user);
 
-        $suggestedScores = $generator->generate($currentScores);
+        $suggested_scores = $generator->generate($current_scores);
 
-        if (!empty($suggestedScores)) {
-            $this->createSuggestions($suggestedScores);
-            $atLeastOneActionDone = true;
+        if (!empty($suggested_scores)) {
+            $this->createSuggestions($suggested_scores);
+            $atLeast_one_action_done = true;
         }
-        return $atLeastOneActionDone;
+        return $atLeast_one_action_done;
     }
     /**
      * @return LearningObjectiveScore[]
@@ -186,14 +200,19 @@ class CalculateScoresAndSuggestions
 
         }
     }
+
+    /**
+     * @param LearningObjectiveResult $objective_result
+     * @return LearningObjectiveScore
+     */
     protected function getLearningObjectiveScore(LearningObjectiveResult $objective_result): LearningObjectiveScore
     {
-
         $scores = LearningObjectiveScore::where(array(
             'course_obj_id' => $objective_result->getLearningObjective()->getCourse()->getId(),
             'objective_id' => $objective_result->getLearningObjective()->getId(),
             'user_id' => $objective_result->getUser()->getId()
         ))->get();
+
         if (count($scores) === 0) {
             $score = new LearningObjectiveScore();
             $score->setCourseObjId($objective_result->getLearningObjective()->getCourse()->getId());
@@ -204,9 +223,14 @@ class CalculateScoresAndSuggestions
 
         return array_values($scores)[0];
     }
+
+    /**
+     * @param int $user_id
+     * @return User
+     */
     protected function getUser(int $user_id): User
     {
-        static $cache = array();
+        static $cache = [];
         if (isset($cache[$user_id])) {
             return $cache[$user_id];
         }
@@ -216,19 +240,31 @@ class CalculateScoresAndSuggestions
         return $user;
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param int                     $objective_id
+     * @return LearningObjective
+     */
     public function getLearningObjective(LearningObjectiveCourse $course, int $objective_id): LearningObjective
     {
-        static $cache = array();
+        static $cache = [];
         $cache_key = $course->getId() . $objective_id;
         if (isset($cache[$cache_key])) {
             return $cache[$cache_key];
         }
-        $objective = new LearningObjective(new \ilCourseObjective($course->getILIASCourse(), $objective_id));
+        $objective = new LearningObjective(
+            new \ilCourseObjective($course->getILIASCourse(), $objective_id)
+        );
         $cache[$cache_key] = $objective;
 
         return $objective;
     }
 
+    /**
+     * @param LearningObjectiveCourse $course
+     * @param User                    $user
+     * @return string
+     */
     public function getSQL(LearningObjectiveCourse $course, User $user): string
     {
         $sql = 'SELECT DISTINCT loc_user_results.* FROM loc_user_results
@@ -255,8 +291,6 @@ class CalculateScoresAndSuggestions
 					AND tst_active.submitted > 0
                     AND loc_user_results.user_id = ' . $this->db->quote($user->getId(), 'integer') . '
                     ORDER BY loc_user_results.user_id, loc_user_results.course_id';
-
-        //AND ' . LearningObjectiveScore::TABLE_NAME . '.id IS NULL ';
 
         return $sql;
     }

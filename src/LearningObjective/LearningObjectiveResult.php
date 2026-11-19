@@ -10,10 +10,12 @@ class LearningObjectiveResult
      * @var LearningObjective
      */
     protected LearningObjective $objective;
+
     /**
      * @var User
      */
     protected User $user;
+
     /**
      * @param LearningObjective $objective
      * @param User              $user
@@ -23,6 +25,7 @@ class LearningObjectiveResult
         $this->objective = $objective;
         $this->user = $user;
     }
+
     /**
      * @return int
      */
@@ -32,10 +35,18 @@ class LearningObjectiveResult
             ->getId(), $this->user->getId(), $this->objective->getId(), \ilLOUserResults::TYPE_INITIAL);
         return $data['result_perc'];
     }
+
+    /**
+     * @return LearningObjective
+     */
     public function getLearningObjective(): LearningObjective
     {
         return $this->objective;
     }
+
+    /**
+     * @return User
+     */
     public function getUser(): User
     {
         return $this->user;

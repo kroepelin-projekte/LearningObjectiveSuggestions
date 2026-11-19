@@ -13,7 +13,9 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 class LearningObjectiveSuggestionGenerator
 {
     protected CourseConfigProvider $config;
+
     protected LearningObjectiveQuery $learning_objective_query;
+
     protected Log $log;
 
     /**
@@ -159,6 +161,10 @@ class LearningObjectiveSuggestionGenerator
         $cache[$user_id] = $user;
         return $user;
     }
+
+    /**
+     * @return array
+     */
     protected function getMainObjectiveIds(): array
     {
         return array_map(function ($objective) {
@@ -166,6 +172,10 @@ class LearningObjectiveSuggestionGenerator
             return $objective->getId();
         }, $this->learning_objective_query->getMain());
     }
+
+    /**
+     * @return array
+     */
     protected function getExtendedObjectiveIds(): array
     {
         return array_map(function ($objective) {

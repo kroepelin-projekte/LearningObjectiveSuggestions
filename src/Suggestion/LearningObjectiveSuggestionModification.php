@@ -12,9 +12,13 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 class LearningObjectiveSuggestionModification
 {
     protected LearningObjectiveCourse $course;
+
     protected User $user;
+
     protected ModificationLog $log;
+
     protected User $editor;
+
     protected LearningObjectiveQuery $learning_objective_query;
 
 
@@ -32,7 +36,6 @@ class LearningObjectiveSuggestionModification
         $this->editor = $editor;
         $this->learning_objective_query = new LearningObjectiveQuery(new CourseConfigProvider($course));
     }
-
 
     /**
      * Replace current suggestions with the given learning objectives
@@ -95,6 +98,11 @@ class LearningObjectiveSuggestionModification
         $this->log->write("Deleted learning objective suggestions:\n" . implode("\n", $this->getLearningObjectives($delete_suggestions)));
         $this->log->write("Current learning objective suggestions:\n" . implode("\n", $this->getLearningObjectives($new_suggestions)));
     }
+
+    /**
+     * @param array $suggestions
+     * @return array
+     */
     protected function getLearningObjectives(array $suggestions): array
     {
         $objectives = array();

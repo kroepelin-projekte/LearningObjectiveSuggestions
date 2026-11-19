@@ -10,7 +10,9 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 class LearningObjectiveScoreCalculator
 {
     protected CourseConfigProvider $config;
+
     protected Log $log;
+
     protected StudyProgramQuery $study_program_query;
 
 

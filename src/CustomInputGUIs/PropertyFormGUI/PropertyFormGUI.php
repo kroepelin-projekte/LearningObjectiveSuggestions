@@ -18,85 +18,92 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\PropertyForm
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\TabsInputGUI\TabsInputGUI;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\CustomInputGUIs\TabsInputGUI\TabsInputGUITab;
 
-//use srag\DIC\LearningObjectiveSuggestions\DICTrait;
 
 abstract class PropertyFormGUI extends ilPropertyFormGUI
 {
+    /**
+     * @var string
+     *
+     * @deprecated
+     */
+    public const string LANG_MODULE = '';
 
-    //use DICTrait;
+    /**
+     * @var string
+     *
+     * @deprecated
+     */
+    public const string PROPERTY_CLASS = 'class';
 
     /**
      * @var string
      *
      * @deprecated
      */
-    const LANG_MODULE = "";
+    public const string PROPERTY_DISABLED = 'disabled';
+
     /**
      * @var string
      *
      * @deprecated
      */
-    const PROPERTY_CLASS = "class";
+    public const string PROPERTY_MULTI = 'multi';
+
     /**
      * @var string
      *
      * @deprecated
      */
-    const PROPERTY_DISABLED = "disabled";
+    public const string PROPERTY_NOT_ADD = 'not_add';
+
     /**
      * @var string
      *
      * @deprecated
      */
-    const PROPERTY_MULTI = "multi";
+    public const string PROPERTY_OPTIONS = 'options';
+
     /**
      * @var string
      *
      * @deprecated
      */
-    const PROPERTY_NOT_ADD = "not_add";
+    public const string PROPERTY_REQUIRED = 'required';
+
     /**
      * @var string
      *
      * @deprecated
      */
-    const PROPERTY_OPTIONS = "options";
+    public const string PROPERTY_SUBITEMS = 'subitems';
+
     /**
      * @var string
      *
      * @deprecated
      */
-    const PROPERTY_REQUIRED = "required";
-    /**
-     * @var string
-     *
-     * @deprecated
-     */
-    const PROPERTY_SUBITEMS = "subitems";
-    /**
-     * @var string
-     *
-     * @deprecated
-     */
-    const PROPERTY_VALUE = "value";
+    public const string PROPERTY_VALUE = 'value';
+
     /**
      * @var array
      *
      * @deprecated
      */
-    protected $fields = [];
+    protected array $fields = [];
+
     /**
      * @var object
      *
      * @deprecated
      */
     protected $parent;
+
     /**
      * @var ilFormPropertyGUI[]|ilFormSectionHeaderGUI[]
      *
      * @deprecated
      */
-    private $items_cache = [];
+    private array $items_cache = [];
 
 
     /**
@@ -154,10 +161,10 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
      *
      * @deprecated
      */
-    public function txt(string $key,/*?*/ string $default = null) : string
+    public function txt(string $key, ?string $default = null) : string
     {
         if ($default !== null) {
-            return self::plugin()->translate($key, static::LANG_MODULE, [], true, "", $default);
+            return self::plugin()->translate($key, static::LANG_MODULE, [], true, '', $default);
         } else {
             return self::plugin()->translate($key, static::LANG_MODULE);
         }
@@ -177,7 +184,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
     /**
      * @deprecated
      */
-    protected function initAction()/*: void*/
+    protected function initAction(): void
     {
         $this->setFormAction(self::dic()->ctrl()->getFormAction($this->parent));
     }
@@ -186,25 +193,25 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
     /**
      * @deprecated
      */
-    protected abstract function initCommands()/*: void*/ ;
+    abstract protected function initCommands(): void;
 
 
     /**
      * @deprecated
      */
-    protected abstract function initFields()/*: void*/ ;
+    abstract protected function initFields(): void;
 
 
     /**
      * @deprecated
      */
-    protected abstract function initId()/*: void*/ ;
+    abstract protected function initId(): void;
 
 
     /**
      * @deprecated
      */
-    protected abstract function initTitle()/*: void*/ ;
+    abstract protected function initTitle(): void;
 
 
     /**
@@ -212,7 +219,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
      *
      * @deprecated
      */
-    protected final function storeFormCheck() : bool
+    final protected function storeFormCheck() : bool
     {
         $this->setValuesByPost();
 
@@ -232,7 +239,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
      *
      * @deprecated
      */
-    protected abstract function storeValue(string $key, $value)/*: void*/ ;
+    abstract protected function storeValue(string $key, $value): void;
 
 
     /**
@@ -246,7 +253,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
      *
      * @deprecated
      */
-    private function getFields(array $fields, $parent_item)/*: void*/
+    private function getFields(array $fields, $parent_item): void
     {
         if (!is_array($fields)) {
             throw new PropertyFormGUIException("\$fields needs to be an array!", PropertyFormGUIException::CODE_INVALID_FIELD);
@@ -317,7 +324,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
     /**
      * @deprecated
      */
-    private function initForm()/*: void*/
+    private function initForm(): void
     {
         $this->initAction();
 
@@ -332,7 +339,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
     /**
      * @deprecated
      */
-    private function initItems()/*: void*/
+    private function initItems(): void
     {
         $this->initFields();
 
@@ -345,7 +352,7 @@ abstract class PropertyFormGUI extends ilPropertyFormGUI
      *
      * @deprecated
      */
-    private function storeFormItems(array $fields)/*: void*/
+    private function storeFormItems(array $fields): void
     {
         foreach ($fields as $key => $field) {
             if (isset($this->items_cache[$key])) {
