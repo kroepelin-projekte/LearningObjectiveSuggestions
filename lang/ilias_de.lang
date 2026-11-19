@@ -74,4 +74,4 @@ initial_test_missing#:#Der Einstiegstest fehlt für refId
 min_points#:#Mindestpunkte
 max_points#:#Höchstpunkte
 role#:#Rolle
-not_existing_user#:#Benutzer nicht existiert
+not_existing_user#:#Es gibt keinen Benutzer mit dieser ID
