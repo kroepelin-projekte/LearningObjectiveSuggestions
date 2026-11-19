@@ -83,6 +83,7 @@ class NotificationConfigFormGUI
                          ->withRequired(true)
                          ->withDedicatedName('email_subject')
                          ->withValue((string) ($this->config->get('email_subject') ?? ''))
+                         ->withAdditionalTransformation($this->refinery->custom()->transformation(fn(string $v): string => trim(preg_replace('/\R+/', ' ', $v))))
                          ->withAdditionalTransformation($this->refinery->custom()->constraint(fn(string $v): bool => $v !== '', $this->lng->txt('msg_input_is_required')));
 
         $body = $field->textarea($this->pl->txt('body'), $this->pl->txt('body_info'))

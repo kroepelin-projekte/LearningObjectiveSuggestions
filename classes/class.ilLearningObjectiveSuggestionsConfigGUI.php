@@ -273,8 +273,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function confirmDeleteCourse(): void
     {
-        global $DIC;
-
         $confirmation_gui = new ilConfirmationGUI();
         $confirmation_gui->setFormAction($this->ctrl->getFormAction($this));
         $confirmation_gui->setConfirm($this->pl->txt('delete_learning_objective_course'), self::CMD_DELETE_COURSE, self::CMD_DELETE_COURSE);
