@@ -88,7 +88,7 @@ if ($DIC->database()->tableExists('udf_field_id_map')) {
             'cfg_key' => 'udf_id_study_program',
     ])->get();
 
-    if(!empty($configs)) {
+    if (!empty($configs)) {
         foreach ($configs as $config) {
             $value = (int) $config->getValue();
 
@@ -96,6 +96,41 @@ if ($DIC->database()->tableExists('udf_field_id_map')) {
                 $config->setValue($udf_definition_data[$value]);
                 $config->update();
             }
+        }
+    }
+}
+?>
+<#8>
+<?php
+global $DIC;
+
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
+
+// freeze study program ids (weight_rough_<objective>_<id>) as computed before 2.0.1
+$db = $DIC->database();
+if ($db->tableExists('alo_crs_config') && $db->tableExists('udf_definition')) {
+    $configured_ids = [];
+    $res = $db->queryF(
+        'SELECT value FROM alo_crs_config WHERE cfg_key = %s',
+        [\ilDBConstants::T_TEXT],
+        ['udf_id_study_program']
+    );
+    while ($row = $db->fetchAssoc($res)) {
+        $configured_ids[(string) $row['value']] = true;
+    }
+
+    $field_ids = [];
+    foreach (array_keys($configured_ids) as $configured_id) {
+        $field_id = StudyProgramQuery::resolveFieldId((string) $configured_id);
+        if ($field_id !== null) {
+            $field_ids[$field_id] = true;
+        }
+    }
+
+    foreach (array_keys($field_ids) as $field_id) {
+        $definition = StudyProgramQuery::cascadingSelectDefinition((string) $field_id);
+        if ($definition !== null) {
+            StudyProgramQuery::rebuildIds((string) $field_id, StudyProgramQuery::titlesFromDefinition($definition));
         }
     }
 }
