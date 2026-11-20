@@ -90,19 +90,6 @@ class LearningObjectiveSuggestionGenerator
             $suggestions = array_values(array_slice($suggestions, 0, $max));
         }
 
-        $objectiveIds = [];
-        foreach ($suggestions as $suggestion) {
-            $objectiveIds[] = $suggestion->getObjectiveId();
-        }
-
-        $candidates = array_values(array_filter($scores, function ($score) use ($objectiveIds) {
-            return (in_array($score->getObjectiveId(), $objectiveIds));
-        }));
-
-        if (count($candidates)) {
-            $sorted = $this->sortDescByScore($candidates);
-            $suggestions[count($suggestions) - 1] = $sorted[0];
-        }
         return $suggestions;
     }
 
