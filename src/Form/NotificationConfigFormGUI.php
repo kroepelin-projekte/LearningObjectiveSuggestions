@@ -160,6 +160,10 @@ class NotificationConfigFormGUI
             $tpl = $DIC->ui()->mainTemplate();
 
             if (isset($data['configuration']['notification_sender_user_id'])) {
+
+                if (!ctype_digit($data['configuration']['notification_sender_user_id'])) {
+                    $data['configuration']['notification_sender_user_id'] = ilObjUser::_lookupId($data['configuration']['notification_sender_user_id']) ?? '';
+                }
                 $user_exists = \ilObject::_exists((int) $data['configuration']['notification_sender_user_id'], false, 'usr');
 
                 if (!$user_exists) {

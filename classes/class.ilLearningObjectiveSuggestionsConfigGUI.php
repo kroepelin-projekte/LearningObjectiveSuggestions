@@ -13,7 +13,6 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
-use JetBrains\PhpStorm\NoReturn;
 
 /**
  * Class ilLearningObjectiveSuggestionsConfigGUI
@@ -99,11 +98,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     protected ilToolbarGUI $toolbar;
 
-    protected ilRbacReview $rbacreview;
-
     protected ilLearningObjectiveSuggestionsPlugin $pl;
-
-    protected ilTree $tree;
 
     public function __construct()
     {
@@ -112,9 +107,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         $this->ctrl = $DIC->ctrl();
         $this->tabs = $DIC->tabs();
         $this->toolbar = $DIC->toolbar();
-        $this->rbacreview = $DIC->rbac()->review();
         $this->pl = ilLearningObjectiveSuggestionsPlugin::getInstance();
-        $this->tree = $DIC->repositoryTree();
     }
 
     /***

@@ -3,7 +3,6 @@
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion;
 
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
-use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjective;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveResult;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Log\Log;
@@ -147,27 +146,5 @@ class LearningObjectiveSuggestionGenerator
         $user = new User(new \ilObjUser($user_id));
         $cache[$user_id] = $user;
         return $user;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getMainObjectiveIds(): array
-    {
-        return array_map(function ($objective) {
-            /** @var $objective LearningObjective */
-            return $objective->getId();
-        }, $this->learning_objective_query->getMain());
-    }
-
-    /**
-     * @return array
-     */
-    protected function getExtendedObjectiveIds(): array
-    {
-        return array_map(function ($objective) {
-            /** @var $objective LearningObjective */
-            return $objective->getId();
-        }, $this->learning_objective_query->getExtended());
     }
 }

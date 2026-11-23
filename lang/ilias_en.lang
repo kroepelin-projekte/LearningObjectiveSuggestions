@@ -7,7 +7,7 @@ body#:#Content
 body_blub#:#Blub
 cancel#:#Cancel
 cc_role_id#:#CC Role ID Supervisor
-cc_role_id_info#:#Members of this role include a CC as mail when recommendations are sent to a user. To search for course administrator roles, please enter il_crs_admin in the field, and you will be listed with possible courses to choose from.
+cc_role_id_info#:#Members of this role include a CC as mail when recommendations are sent to a user. To choose course administrator role, please enter il_crs_admin_<crs_ref_id> in the field.
 change_udf_study_program#:#Change UDF Study Program
 change_udf_study_program_info#:#Warning: Changing UDF will affect the entire following configuration.
 configuration_saved#:#Configuration saved
@@ -44,8 +44,8 @@ ref_id_info#:#Ref ID of a learning objective course
 save#:#Save
 send_suggestions#:#Send Learning Recommendations
 send_suggestions_description#:#Sends the calculated learning recommendations to users and supervisors
-sender_user_id#:#Sender User ID
-sender_user_id_info#:#User ID of an ILIAS user who sends the emails.
+sender_user_id#:#Sender User ID / Login
+sender_user_id_info#:#User ID or Login of an ILIAS user who sends the emails.
 subject#:#Subject
 steps#:#Steps
 templates#:#Templates
