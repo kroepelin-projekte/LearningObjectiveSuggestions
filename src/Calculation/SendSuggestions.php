@@ -90,8 +90,8 @@ class SendSuggestions
                 }
             }
         } catch (\Throwable $e) {
-            $this->log->write('Error while trying to assign roles for learning objective suggestions: ' . $e->getMessage());
-            $this->log->write($e->getTraceAsString());
+            $this->log->write('Error while trying to assign roles for learning objective suggestions');
+            $this->log->writeThrowable($e);
         }
     }
 
@@ -197,8 +197,8 @@ class SendSuggestions
                 $this->log->write(sprintf($msg, $course->getTitle(), $user->__toString()));
             }
         } catch (\Throwable $e) {
-            $this->log->write('Error while trying to send learning objective suggestions: ' . $e->getMessage());
-            $this->log->write($e->getTraceAsString());
+            $this->log->write('Error while trying to send learning objective suggestions');
+            $this->log->writeThrowable($e);
         }
     }
 

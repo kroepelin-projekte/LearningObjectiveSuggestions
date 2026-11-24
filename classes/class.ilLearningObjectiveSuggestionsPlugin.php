@@ -112,7 +112,8 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
                 try {
                     ilLoggerFactory::getLogger('plugin')->error(
                         'Learning progress handling failed for user ' . ($a_parameter['usr_id'] ?? '')
-                        . ' in obj ' . ($a_parameter['obj_id'] ?? '') . ': ' . $e->getMessage()
+                        . ' in obj ' . ($a_parameter['obj_id'] ?? '') . ': ' . get_class($e) . ': ' . $e->getMessage()
+                        . ' in ' . $e->getFile() . ':' . $e->getLine()
                     );
                 } catch (\Throwable) {
                     // logging must not abort the request either
@@ -121,10 +122,6 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
         }
     }
 
-    /**
-     * @param array $a_parameter
-     * @return void
-     */
     protected function handleLearningProgressChange(array $a_parameter): void
     {
         global $DIC;

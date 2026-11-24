@@ -68,8 +68,7 @@ class Sender
         try {
             $mail->send();
         } catch (\Throwable $e) {
-            $this->log->write($e->getMessage());
-            $this->log->write($e->getTraceAsString());
+            $this->log->writeThrowable($e);
 
             return false;
         }
@@ -81,12 +80,11 @@ class Sender
             $notification->save();
         } catch (\Throwable $e) {
             $this->log->write(sprintf(
-                'Mail sent, but notification for user %s in course obj %s not saved; a later event may send it again: %s',
+                'Mail sent, but notification for user %s in course obj %s not saved; a later event may send it again',
                 $this->user->getId(),
-                $this->course->getId(),
-                $e->getMessage()
+                $this->course->getId()
             ));
-            $this->log->write($e->getTraceAsString());
+            $this->log->writeThrowable($e);
         }
 
         return true;

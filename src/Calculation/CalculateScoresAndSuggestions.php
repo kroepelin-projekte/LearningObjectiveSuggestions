@@ -112,8 +112,7 @@ class CalculateScoresAndSuggestions
                 $score->save();
             } catch (\Throwable $e) {
                 $this->log->write('Exception when trying to calculate the score');
-                $this->log->write($e->getMessage());
-                $this->log->write($e->getTraceAsString());
+                $this->log->writeThrowable($e);
             }
         }
 
@@ -199,8 +198,7 @@ class CalculateScoresAndSuggestions
                     $score->getObjectiveId(),
                     $score->getUserId()
                 ));
-                $this->log->write($e->getMessage());
-                $this->log->write($e->getTraceAsString());
+                $this->log->writeThrowable($e);
             }
 
         }
