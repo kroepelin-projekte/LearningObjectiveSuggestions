@@ -3,9 +3,11 @@
 ## [2.0.2]
 ### Added
 * Scores, suggestions and notifications of a user are deleted when the user is deleted (event deleteUser)
+* The sender of the notifications is optional: with an empty sender no emails with learning objective suggestions are sent; once a sender is configured, they are sent on the user's next learning progress status change in the course (not by the manual generation)
 
 ### Fixed
 * The update to 2.0.2 removes the data of users deleted before
+* No email is sent if the configured sender does not exist
 
 ## [2.0.1]
 ### Fixed

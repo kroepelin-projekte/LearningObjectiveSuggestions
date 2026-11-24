@@ -45,7 +45,7 @@ save#:#Save
 send_suggestions#:#Send Learning Recommendations
 send_suggestions_description#:#Sends the calculated learning recommendations to users and supervisors
 sender_user_id#:#Sender User ID / Login
-sender_user_id_info#:#User ID or Login of an ILIAS user who sends the emails.
+sender_user_id_info#:#User ID or Login of an ILIAS user who sends the emails. Leave empty to send no emails with learning objective suggestions.
 subject#:#Subject
 steps#:#Steps
 templates#:#Templates

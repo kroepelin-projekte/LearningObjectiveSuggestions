@@ -45,7 +45,7 @@ save#:#Speichern
 send_suggestions#:#Lernziel-Empfehlungen versenden
 send_suggestions_description#:#Versendet die berechneten Lernziel-Empfehlungen an Benutzer und Betreuer
 sender_user_id#:#User-ID/Login Absender
-sender_user_id_info#:#User-ID oder Login eines ILIAS Benutzers, welcher die Mails versendet.
+sender_user_id_info#:#User-ID oder Login eines ILIAS Benutzers, welcher die Mails versendet. Leer lassen, um keine Mails mit Lernempfehlungen zu versenden.
 subject#:#Betreff
 steps#:#Steps
 templates#:#Vorlagen

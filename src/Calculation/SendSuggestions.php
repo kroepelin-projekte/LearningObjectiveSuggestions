@@ -182,6 +182,16 @@ class SendSuggestions
     protected function send(LearningObjectiveCourse $course, User $user): void
     {
         $config = new CourseConfigProvider($course);
+        // no notification row is written: the mail is retried on the next trigger
+        $sender_id = (int) ($config->get('notification_sender_user_id') ?? 0);
+        if ($sender_id <= 0) {
+            return;
+        }
+        if (!\ilObject::_exists($sender_id, false, 'usr')) {
+            $msg = 'Sender %d of course %s (obj_id %d) does not exist, learning objective suggestions for user %d not sent';
+            $this->log->write(sprintf($msg, $sender_id, $course->getTitle(), $course->getId(), $user->getId()));
+            return;
+        }
         $query = new LearningObjectiveQuery($config);
         $placeholders = new Placeholders();
         // Note: If we can't parse the mail templates, we fail silently but write to log

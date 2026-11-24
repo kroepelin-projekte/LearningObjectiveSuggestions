@@ -39,7 +39,8 @@ class NotificationConfigFormGUI
      * @param Parser               $parser
      */
     public function __construct(
-        CourseConfigProvider $config, Parser $parser
+        CourseConfigProvider $config,
+        Parser $parser
     ) {
         global $DIC;
 
@@ -65,7 +66,6 @@ class NotificationConfigFormGUI
         $username = $user_id > 0 ? ilObjUser::_lookupLogin($this->config->get('notification_sender_user_id')) : '';
 
         $sender = $field->text($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
-                        ->withRequired(true)
                         ->withDedicatedName('notification_sender_user_id')
                         ->withValue($username);
 
@@ -104,12 +104,12 @@ class NotificationConfigFormGUI
             $placeholderList = $this->ui->listing()->unordered($available_placeholders);
 
             $placeholders_array = [];
-            foreach($placeholderList->getItems() as $key =>$list) {
+            foreach ($placeholderList->getItems() as $key => $list) {
                 $placeholders_array[] = "&lbrace;&lbrace; {$key} &rbrace;&rbrace; : {$this->pl->txt($list)}";
             }
 
             $placeholderListHtml = '<br>' . $this->pl->txt("placeholders_info") . '<br><br>';
-            foreach($placeholders_array as $val) {
+            foreach ($placeholders_array as $val) {
                 $placeholderListHtml .= $val . '<br>';
             }
 
@@ -160,17 +160,21 @@ class NotificationConfigFormGUI
             $data = $form->getData();
             $tpl = $DIC->ui()->mainTemplate();
 
-            if (isset($data['configuration']['notification_sender_user_id'])) {
+            if (isset($data['configuration'])) {
+                $sender = trim((string) ($data['configuration']['notification_sender_user_id'] ?? ''));
+                // Empty sender is stored as '' and disables the mails.
+                if ($sender !== '') {
+                    if (!ctype_digit($sender)) {
+                        $sender = (string) (ilObjUser::_lookupId($sender) ?? '');
+                    }
+                    $user_exists = \ilObject::_exists((int) $sender, false, 'usr');
 
-                if (!ctype_digit($data['configuration']['notification_sender_user_id'])) {
-                    $data['configuration']['notification_sender_user_id'] = ilObjUser::_lookupId($data['configuration']['notification_sender_user_id']) ?? '';
+                    if (!$user_exists) {
+                        $tpl->setOnScreenMessage('failure', $this->pl->txt('not_existing_user'), true);
+                        $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
+                    }
                 }
-                $user_exists = \ilObject::_exists((int) $data['configuration']['notification_sender_user_id'], false, 'usr');
-
-                if (!$user_exists) {
-                    $tpl->setOnScreenMessage('failure', $this->pl->txt('not_existing_user'), true);
-                    $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
-                }
+                $data['configuration']['notification_sender_user_id'] = $sender;
             }
 
             $placeholders = new Placeholders();
