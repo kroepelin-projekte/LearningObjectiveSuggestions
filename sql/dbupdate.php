@@ -135,3 +135,17 @@ if ($db->tableExists('alo_crs_config') && $db->tableExists('udf_definition')) {
     }
 }
 ?>
+<#9>
+<?php
+global $DIC;
+
+// orphans of users deleted while deleteUser was not handled
+$db = $DIC->database();
+foreach (['alo_score', 'alo_suggestion', 'alo_notification'] as $table) {
+    if ($db->tableExists($table)) {
+        $db->manipulate(
+            'DELETE FROM ' . $table . ' WHERE NOT EXISTS (SELECT 1 FROM usr_data u WHERE u.usr_id = ' . $table . '.user_id)'
+        );
+    }
+}
+?>

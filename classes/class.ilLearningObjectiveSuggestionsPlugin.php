@@ -12,6 +12,7 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Score\LearningObjectiveScore
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Calculation\SendSuggestions;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\UserDataCleanup;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\LearningObjective\LearningObjectiveCourse;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 
@@ -99,6 +100,21 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
      */
     public function handleEvent(string $a_component, string $a_event, array $a_parameter): void
     {
+        if (in_array($a_component, ['Services/User', 'components/ILIAS/User'], true) && $a_event === 'deleteUser') {
+            // Nothing may abort the user deletion in the core.
+            try {
+                (new UserDataCleanup($this->db, ilLoggerFactory::getLogger('plugin')))
+                    ->deleteUserData((int) ($a_parameter['usr_id'] ?? 0));
+            } catch (\Throwable $e) {
+                try {
+                    ilLoggerFactory::getLogger('plugin')->error('User data cleanup failed: ' . $e->getMessage());
+                } catch (\Throwable) {
+                    // logging must not abort the deletion either
+                }
+            }
+            return;
+        }
+
         if (
             $a_component == 'components/ILIAS/Tracking'
             && $a_event == 'updateStatus'

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2]
+### Added
+* Scores, suggestions and notifications of a user are deleted when the user is deleted (event deleteUser)
+
+### Fixed
+* The update to 2.0.2 removes the data of users deleted before
+
 ## [2.0.1]
 ### Fixed
 * Study programs are read from the current CascadingSelect definition (udf_definition) instead of the frozen table udf_plugin_cselect
