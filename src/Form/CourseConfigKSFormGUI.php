@@ -208,7 +208,7 @@ class CourseConfigKSFormGUI
 
         if (
             $request->getMethod() !== 'POST'
-            || !array_key_exists('course_ref_id', $request->getQueryParams())
+            || !$DIC->http()->wrapper()->query()->has('course_ref_id')
         ) {
             return $form;
         }

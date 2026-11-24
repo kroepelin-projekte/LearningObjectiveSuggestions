@@ -1,5 +1,7 @@
 <?php
 
+use ILIAS\HTTP\Wrapper\RequestWrapper;
+use ILIAS\Refinery\Factory as Refinery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\ConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form\CourseConfigFormGUI;
@@ -97,6 +99,10 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     protected ilLearningObjectiveSuggestionsPlugin $pl;
 
+    private RequestWrapper $query;
+
+    private Refinery $refinery;
+
     public function __construct()
     {
         global $DIC;
@@ -105,6 +111,40 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         $this->tabs = $DIC->tabs();
         $this->toolbar = $DIC->toolbar();
         $this->pl = ilLearningObjectiveSuggestionsPlugin::getInstance();
+        $this->query = $DIC->http()->wrapper()->query();
+        $this->refinery = $DIC->refinery();
+    }
+
+    /**
+     * @return int 0 if course_ref_id is missing or not an integer
+     */
+    private function getCourseRefId(): int
+    {
+        return $this->query->retrieve(
+            'course_ref_id',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(0),
+            ])
+        );
+    }
+
+    /**
+     * Returns to the parent (exits) unless course_ref_id is an existing course configured in this plugin
+     *
+     * @throws ilCtrlException
+     */
+    private function getConfiguredCourse(): LearningObjectiveCourse
+    {
+        $ref_id = $this->getCourseRefId();
+        // course_ref_ids may hold numeric strings from older data
+        $configured_ref_ids = array_map('intval', (new ConfigProvider())->getCourseRefIds());
+
+        if (!in_array($ref_id, $configured_ref_ids, true) || !ilObject::_exists($ref_id, true, 'crs')) {
+            $this->ctrl->returnToParent($this);
+        }
+
+        return new LearningObjectiveCourse(new ilObjCourse($ref_id));
     }
 
     /***
@@ -219,11 +259,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
             $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE)
         );
 
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $this->initCourseHeader($course);
         $config = new CourseConfigProvider($course);
 
@@ -280,20 +316,17 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function deleteCourse(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new ConfigProvider();
         $course_config = new CourseConfigProvider($course);
-        $ref_ids = (array) json_decode($config->get('course_ref_ids'), true);
+        $ref_id = $course->getRefId();
+        // normalize to int (older data may hold numeric strings) and reindex so json_encode keeps a list
+        $ref_ids = array_values(array_unique(array_filter(
+            array_map('intval', $config->getCourseRefIds()),
+            static fn(int $id): bool => $id !== $ref_id
+        )));
 
-        if (($key = array_search($_GET['course_ref_id'], $ref_ids)) !== false) {
-            unset($ref_ids[$key]);
-        }
-
-        $config->set('course_ref_ids', json_encode(array_unique($ref_ids)));
+        $config->set('course_ref_ids', json_encode($ref_ids));
         $course_config->delete();
         $this->tpl->setOnScreenMessage('success', $this->pl->txt("course_removed"), true);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
@@ -307,14 +340,10 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
     {
         global $DIC;
 
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
         $renderer = $DIC->ui()->renderer();
 
         $this->addActions(self::TAB_CONFIGURE_NOTIFICATIONS);
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $this->initCourseHeader($course);
         $this->tabs->setBackTarget($this->pl->txt("back"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE));
 
@@ -510,11 +539,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function saveNotifications(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
 
         $course_main_config_form = new NotificationConfigFormGUI(
@@ -531,11 +556,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function saveMainConfig(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
 
         $learning_objective_query = new LearningObjectiveQuery($config);
@@ -568,12 +589,8 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function saveRoles(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
         $this->addActions(self::TAB_CONFIGURE_COURSE);
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $this->tabs->setBackTarget(
             $this->pl->txt('back'),
             $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE)
@@ -601,11 +618,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function activateCalculation(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
         $config->set('is_calculation_inactive', 0);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
@@ -617,11 +630,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function deactivateCalculation(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
         $config->set('is_calculation_inactive', 1);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
