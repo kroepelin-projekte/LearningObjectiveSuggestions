@@ -14,8 +14,8 @@
 ### Fixed
 * Study programs are read from the current CascadingSelect definition (udf_definition) instead of the frozen table udf_plugin_cselect
 * Study program of users with a first-level option without children (e.g. "DuO → Allgemein → keine") is recognized
-* Study program ids are stored per field (alo_config), new study programs no longer shift the ids of the rough weights
-* Renamed study programs get a new id: enter their rough weights again
+* CascadingSelect fields: study program ids are stored per field (alo_config), new study programs no longer shift the ids of the rough weights (normal select fields keep the option's position in the option list as id)
+* CascadingSelect fields: renamed study programs get a new id, enter their rough weights again
 * Install the update to 2.0.1 before udf_plugin_cselect is removed (CascadingSelect), otherwise the ids are built from the current definition
 
 ## [2.0.0]
