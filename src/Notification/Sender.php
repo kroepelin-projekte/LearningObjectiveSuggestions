@@ -67,18 +67,29 @@ class Sender
         }
         try {
             $mail->send();
-            $notification = $this->getNotification();
-            $notification->setSentUserId($sender->getId());
-            $notification->setSentAt(date('Y-m-d H:i:s'));
-            $notification->save();
-
-            return true;
         } catch (\Throwable $e) {
             $this->log->write($e->getMessage());
             $this->log->write($e->getTraceAsString());
 
             return false;
         }
+
+        try {
+            $notification = $this->getNotification();
+            $notification->setSentUserId($sender->getId());
+            $notification->setSentAt(date('Y-m-d H:i:s'));
+            $notification->save();
+        } catch (\Throwable $e) {
+            $this->log->write(sprintf(
+                'Mail sent, but notification for user %s in course obj %s not saved; a later event may send it again: %s',
+                $this->user->getId(),
+                $this->course->getId(),
+                $e->getMessage()
+            ));
+            $this->log->write($e->getTraceAsString());
+        }
+
+        return true;
     }
 
     /**

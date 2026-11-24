@@ -5,7 +5,9 @@
 
 * Mail errors from `ilMail::enqueue()` (`ilMailError` objects) caused a fatal error instead of being logged
 * Logging a failed suggestion save caused a fatal error and lost the original exception
-* PHP errors (not only exceptions) when calculating and saving scores and suggestions, assigning roles and sending mails are logged instead of aborting the request that changed the learning progress
+* Errors while handling a learning progress change (configuration, course and user lookup, calculating and saving scores and suggestions, assigning roles, sending mails) are logged instead of aborting the request that changed the learning progress
+* A failure to save the notification after the mail was sent is logged as such and no longer reported as a failed mail
+* `InternalMail::bcc()` added recipients to CC instead of BCC
 
 ## [2.0.0]
 ### Updated

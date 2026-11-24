@@ -105,30 +105,50 @@ class ilLearningObjectiveSuggestionsPlugin extends ilEventHookPlugin
             && $a_parameter['old_status'] == \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM
             && $a_parameter['status'] > \ilLPStatus::LP_STATUS_IN_PROGRESS_NUM
         ) {
-
-            global $DIC;
-
-            $config = new ConfigProvider();
-
-            $ref_ids = $config->getCourseRefIds();
-            $test_ref_ids = ilObject::_getAllReferences($a_parameter['obj_id']);
-
-            $parent_found = false;
-            $parent = 0;
-            foreach ($test_ref_ids as $test_ref_id) {
-                $parent = $DIC->repositoryTree()->getParentId($test_ref_id);
-                if (in_array($parent, $ref_ids)) {
-                    $parent_found = true;
-                    break;
+            // Nothing may abort the request that changed the learning progress.
+            try {
+                $this->handleLearningProgressChange($a_parameter);
+            } catch (\Throwable $e) {
+                try {
+                    ilLoggerFactory::getLogger('plugin')->error(
+                        'Learning progress handling failed for user ' . ($a_parameter['usr_id'] ?? '')
+                        . ' in obj ' . ($a_parameter['obj_id'] ?? '') . ': ' . $e->getMessage()
+                    );
+                } catch (\Throwable) {
+                    // logging must not abort the request either
                 }
             }
-            if ($parent_found && ilObject::_lookupType($parent, true) === 'crs') {
-                $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
-                if (!$course->getIsCalculationInactive()) {
-                    $user = new User(new ilObjUser($a_parameter['usr_id']));
-                    if ($this->startCalculation($course, $user)) {
-                        $this->sendSuggestions($course, $user);
-                    }
+        }
+    }
+
+    /**
+     * @param array $a_parameter
+     * @return void
+     */
+    protected function handleLearningProgressChange(array $a_parameter): void
+    {
+        global $DIC;
+
+        $config = new ConfigProvider();
+
+        $ref_ids = $config->getCourseRefIds();
+        $test_ref_ids = ilObject::_getAllReferences($a_parameter['obj_id']);
+
+        $parent_found = false;
+        $parent = 0;
+        foreach ($test_ref_ids as $test_ref_id) {
+            $parent = $DIC->repositoryTree()->getParentId($test_ref_id);
+            if (in_array($parent, $ref_ids)) {
+                $parent_found = true;
+                break;
+            }
+        }
+        if ($parent_found && ilObject::_lookupType($parent, true) === 'crs') {
+            $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
+            if (!$course->getIsCalculationInactive()) {
+                $user = new User(new ilObjUser($a_parameter['usr_id']));
+                if ($this->startCalculation($course, $user)) {
+                    $this->sendSuggestions($course, $user);
                 }
             }
         }

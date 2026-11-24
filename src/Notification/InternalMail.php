@@ -79,9 +79,9 @@ class InternalMail
     public function bcc(User|\ilObjRole $user_or_role): static
     {
         if ($user_or_role instanceof User) {
-            $this->cc[] = $user_or_role->getLogin();
+            $this->bcc[] = $user_or_role->getLogin();
         } elseif ($user_or_role instanceof \ilObjRole) {
-            $this->cc[] = "#" . $user_or_role->getTitle();
+            $this->bcc[] = "#" . $user_or_role->getTitle();
         }
         return $this;
     }
