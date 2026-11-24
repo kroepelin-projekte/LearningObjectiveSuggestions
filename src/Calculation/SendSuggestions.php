@@ -200,11 +200,11 @@ class SendSuggestions
             $p = $placeholders->getPlaceholders($course, $user, $objectives);
             $subject = $this->parser->parse($config->getEmailSubjectTemplate(), $p);
             $body = $this->parser->parse($config->getEmailBodyTemplate(), $p);
-            $sender = new Sender($course, $user, $this->log);
-            $sender->subject($subject)->body($body);
-            if (!$sender->send()) {
-                $msg = "Failed to send learning objective suggestions for course %s and User %s";
-                $this->log->write(sprintf($msg, $course->getTitle(), $user->__toString()));
+            $mail_sender = new Sender($course, $user, new User(new \ilObjUser($sender_id)), $this->log);
+            $mail_sender->subject($subject)->body($body);
+            if (!$mail_sender->send()) {
+                $msg = "Failed to send learning objective suggestions for course %s and user %d";
+                $this->log->write(sprintf($msg, $course->getTitle(), $user->getId()));
             }
         } catch (\Exception $e) {
             $this->log->write('Error while trying to send learning objective suggestions: ' . $e->getMessage());

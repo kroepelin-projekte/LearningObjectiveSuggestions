@@ -8,6 +8,7 @@
 ### Fixed
 * The update to 2.0.2 removes the data of users deleted before
 * No email is sent if the configured sender does not exist
+* Logs contain only the user id instead of login and email; existing log files are not changed
 
 ## [2.0.1]
 ### Fixed

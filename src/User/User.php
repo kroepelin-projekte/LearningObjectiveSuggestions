@@ -54,15 +54,9 @@ class User
         return $this->user->getLastname();
     }
 
-    /**
-     * @return string
-     */
+    /** Only the ID: ends up in logs. */
     public function __toString(): string
     {
-        return '[' . implode(', ', array(
-                $this->getId(),
-                $this->getLogin(),
-                $this->getEmail(),
-            )) . ']';
+        return (string) $this->getId();
     }
 }

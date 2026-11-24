@@ -90,8 +90,8 @@ class LearningObjectiveSuggestionModification
             $suggestion->setSort(++$sort);
             $suggestion->save();
         }
-        $this->log->write("Manually change suggested learning objectives in course {$this->course} for {$this->user}");
-        $this->log->write("Editor: {$this->editor}");
+        $this->log->write("Manually change suggested learning objectives in course {$this->course} for user {$this->user->getId()}");
+        $this->log->write("Editor: user {$this->editor->getId()}");
         $this->log->write("Learning objective suggestions before modification:\n"
             . implode("\n", $this->getLearningObjectives($current_suggestions)));
         $this->log->write("Newly added learning objective suggestions:\n" . implode("\n", $this->getLearningObjectives($added_suggestions)));

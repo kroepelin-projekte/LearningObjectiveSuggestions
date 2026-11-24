@@ -17,17 +17,21 @@ class Sender
 
     protected User $user;
 
+    protected User $sender;
+
     protected Log $log;
 
     /**
      * @param LearningObjectiveCourse $course
      * @param User                    $user
+     * @param User                    $sender existing user, checked by the caller
      * @param Log                     $log
      */
-    public function __construct(LearningObjectiveCourse $course, User $user, Log $log)
+    public function __construct(LearningObjectiveCourse $course, User $user, User $sender, Log $log)
     {
         $this->course = $course;
         $this->user = $user;
+        $this->sender = $sender;
         $this->log = $log;
     }
 
@@ -59,16 +63,15 @@ class Sender
     public function send(): bool
     {
         $config = new CourseConfigProvider($this->course);
-        $sender = new User(new \ilObjUser($config->get('notification_sender_user_id')));
         $mail = new InternalMail();
-        $mail->subject($this->subject)->body($this->body)->from($sender)->to($this->user);
+        $mail->subject($this->subject)->body($this->body)->from($this->sender)->to($this->user);
         if ($cc_role_id = $config->get('notification_cc_role_id')) {
             $mail->cc($this->getRole($cc_role_id));
         }
         try {
             $mail->send();
             $notification = $this->getNotification();
-            $notification->setSentUserId($sender->getId());
+            $notification->setSentUserId($this->sender->getId());
             $notification->setSentAt(date('Y-m-d H:i:s'));
             $notification->save();
 
