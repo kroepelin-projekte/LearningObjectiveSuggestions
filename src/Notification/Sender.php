@@ -73,8 +73,9 @@ class Sender
             $notification->save();
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->log->write($e->getMessage());
+            $this->log->write($e->getTraceAsString());
 
             return false;
         }

@@ -110,7 +110,7 @@ class CalculateScoresAndSuggestions
 
                 $score->setScore($calculated_score);
                 $score->save();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $this->log->write('Exception when trying to calculate the score');
                 $this->log->write($e->getMessage());
                 $this->log->write($e->getTraceAsString());
@@ -192,8 +192,13 @@ class CalculateScoresAndSuggestions
                 $suggestion->setUserId($score->getUserId());
                 $suggestion->setSort(++$sort);
                 $suggestion->save();
-            } catch (\Exception $e) {
-                $this->log->write("Exception when trying to save a suggestions {$suggestion}");
+            } catch (\Throwable $e) {
+                $this->log->write(sprintf(
+                    'Exception when trying to save a suggestion (course_obj_id %d, objective_id %d, user_id %d)',
+                    $score->getCourseObjId(),
+                    $score->getObjectiveId(),
+                    $score->getUserId()
+                ));
                 $this->log->write($e->getMessage());
                 $this->log->write($e->getTraceAsString());
             }
