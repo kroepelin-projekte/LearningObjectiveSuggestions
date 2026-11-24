@@ -7,13 +7,16 @@ use ilCtrlInterface;
 use ilLanguage;
 use ilLearningObjectiveSuggestionsConfigGUI;
 use ilLearningObjectiveSuggestionsPlugin;
+use ilObject;
 use ilStr;
 use ilUtil;
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
+use ILIAS\Filesystem\Stream\Streams;
 use ILIAS\HTTP\Services as HttpServices;
 use ILIAS\Refinery\Factory as Refinery;
+use ILIAS\UI\Component\Component;
 use ILIAS\UI\Component\Table\Action\Action;
 use ILIAS\UI\Component\Table\Column\Column;
 use ILIAS\UI\Component\Table\Data;
@@ -40,11 +43,10 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
     private const string ACTION_DEACTIVATE = 'deactivate';
 
     /**
-     * Maps table actions to the existing ilCtrl commands of the parent GUI
+     * Maps table actions to the existing ilCtrl commands of the parent GUI; delete is answered async (modal)
      */
     private const array ACTION_COMMANDS = [
         self::ACTION_CONFIGURE => ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIGURE_COURSE,
-        self::ACTION_DELETE => ilLearningObjectiveSuggestionsConfigGUI::CMD_CONFIRM_DELETE_COURSE_CONFIG,
         self::ACTION_ACTIVATE => ilLearningObjectiveSuggestionsConfigGUI::CMD_ACTIVATE_CALCULATION,
         self::ACTION_DEACTIVATE => ilLearningObjectiveSuggestionsConfigGUI::CMD_DEACTIVATE_CALCULATION,
     ];
@@ -129,7 +131,8 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
 
     /**
      * Redirects to the ilCtrl command of a clicked row action, passing the course as plain 'course_ref_id'
-     * parameter as expected by the command methods. Does nothing if no row action was triggered.
+     * parameter as expected by the command methods. Answers the async delete action with a confirmation modal
+     * and exits. Does nothing if no row action was triggered.
      *
      * @return void
      * @throws \ilCtrlException
@@ -137,15 +140,28 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
     public function handleTableAction(): void
     {
         $query = $this->http->wrapper()->query();
-        if (!$query->has($this->action_token->getName()) || !$query->has($this->row_id_token->getName())) {
+        if (!$query->has($this->action_token->getName())) {
             return;
         }
 
         $action = $query->retrieve($this->action_token->getName(), $this->refinery->kindlyTo()->string());
-        $ref_ids = $query->retrieve(
-            $this->row_id_token->getName(),
-            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int())
-        );
+        $ref_ids = $query->has($this->row_id_token->getName())
+            ? $query->retrieve(
+                $this->row_id_token->getName(),
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                    $this->refinery->always([]),
+                ])
+            )
+            : [];
+
+        // the async delete action must always be answered with a fragment, never with a redirect
+        if ($action === self::ACTION_DELETE) {
+            if (count($ref_ids) !== 1) {
+                $this->sendNotFound();
+            }
+            $this->sendDeleteConfirmation(current($ref_ids));
+        }
 
         if (!isset(self::ACTION_COMMANDS[$action]) || count($ref_ids) !== 1) {
             return;
@@ -153,6 +169,58 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
 
         $this->ctrl->setParameter($this->parent_obj, 'course_ref_id', current($ref_ids));
         $this->ctrl->redirect($this->parent_obj, self::ACTION_COMMANDS[$action]);
+    }
+
+    /**
+     * deleteCourse checks the course again on confirmation
+     *
+     * @throws \ilCtrlException
+     */
+    protected function sendDeleteConfirmation(int $ref_id): never
+    {
+        // course_ref_ids may hold numeric strings from older data
+        $configured_ref_ids = array_map('intval', (new ConfigProvider())->getCourseRefIds());
+        if (!in_array($ref_id, $configured_ref_ids, true) || !ilObject::_exists($ref_id, true, 'crs')) {
+            $this->sendNotFound();
+        }
+
+        // getFormAction() adds the CSRF token (rtoken); course_ref_id is read by deleteCourse
+        $this->ctrl->setParameter($this->parent_obj, 'course_ref_id', $ref_id);
+        $form_action = $this->ctrl->getFormAction(
+            $this->parent_obj,
+            ilLearningObjectiveSuggestionsConfigGUI::CMD_DELETE_COURSE
+        );
+
+        $this->sendAsync(
+            $this->ui_factory->modal()->interruptive(
+                $this->pl->txt('delete_learning_objective_course'),
+                $this->pl->txt('confirm_delete_crs'),
+                $form_action
+            )->withAffectedItems([
+                $this->ui_factory->modal()->interruptiveItem()->standard(
+                    (string) $ref_id,
+                    // the UI framework renders item titles unescaped
+                    $this->refinery->encode()->htmlSpecialCharsAsEntities()->transform(
+                        ilObject::_lookupTitle(ilObject::_lookupObjId($ref_id))
+                    )
+                )
+            ])->withActionButtonLabel($this->pl->txt('delete_learning_objective_course'))
+                ->withCancelButtonLabel($this->pl->txt('cancel'))
+        );
+    }
+
+    protected function sendNotFound(): never
+    {
+        $this->sendAsync($this->ui_factory->messageBox()->failure($this->lng->txt('obj_not_found')));
+    }
+
+    protected function sendAsync(Component $component): never
+    {
+        $this->http->saveResponse(
+            $this->http->response()->withBody(Streams::ofString($this->ui_renderer->renderAsync($component)))
+        );
+        $this->http->sendResponse();
+        $this->http->close();
     }
 
     /**
@@ -255,6 +323,7 @@ class LearningObjectiveCourseTableGUI implements DataRetrieval
                 $this->row_id_token
             );
         }
+        $actions[self::ACTION_DELETE] = $actions[self::ACTION_DELETE]->withAsync();
 
         return $actions;
     }

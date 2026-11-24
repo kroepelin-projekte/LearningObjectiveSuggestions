@@ -33,8 +33,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     public const string CMD_CONFIGURE_COURSE = 'configureCourse';
 
-    public const string CMD_CONFIRM_DELETE_COURSE_CONFIG = 'confirmDeleteCourse';
-
     public const string CMD_DELETE_COURSE = 'deleteCourse';
 
     public const string CMD_CONFIGURE_NOTIFICATIONS = 'configureNotifications';
@@ -66,7 +64,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         self::CMD_SAVE_ROLES,
         self::CMD_CONFIGURE_NOTIFICATIONS,
         self::CMD_SAVE_NOTIFICATIONS,
-        self::CMD_CONFIRM_DELETE_COURSE_CONFIG,
         self::CMD_DELETE_COURSE,
         self::CMD_ACTIVATE_CALCULATION,
         self::CMD_DEACTIVATE_CALCULATION,
@@ -291,24 +288,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         }
 
         $this->tpl->setContent($html);
-    }
-
-    /**
-     * @throws ilCtrlException
-     */
-    protected function confirmDeleteCourse(): void
-    {
-        $confirmation_gui = new ilConfirmationGUI();
-        $confirmation_gui->setFormAction($this->ctrl->getFormAction($this));
-        $confirmation_gui->setConfirm($this->pl->txt('delete_learning_objective_course'), self::CMD_DELETE_COURSE, self::CMD_DELETE_COURSE);
-
-        $this->ctrl->setParameter($this, 'cmd', self::CMD_CANCEL);
-
-        $confirmation_gui->setCancel($this->pl->txt('cancel'), self::CMD_CANCEL, self::CMD_CANCEL);
-        $confirmation_gui->setHeaderText($this->pl->txt('confirm_delete_crs'));
-
-        $this->ctrl->clearParameterByClass(self::class, 'course_ref_id');
-        $this->tpl->setContent($confirmation_gui->getHTML());
     }
 
     /**
