@@ -63,11 +63,15 @@ class NotificationConfigFormGUI
         $field = $this->ui->input()->field();
 
         $user_id = (int) $this->config->get('notification_sender_user_id');
-        $username = $user_id > 0 ? ilObjUser::_lookupLogin($this->config->get('notification_sender_user_id')) : '';
+        $sender_value = '';
+        if ($user_id > 0) {
+            // A deleted sender stays visible as id, so saving fails until the admin replaces or clears it.
+            $sender_value = \ilObject::_exists($user_id, false, 'usr') ? ilObjUser::_lookupLogin($user_id) : (string) $user_id;
+        }
 
         $sender = $field->text($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
                         ->withDedicatedName('notification_sender_user_id')
-                        ->withValue($username);
+                        ->withValue($sender_value);
 
         $cc_role = $field->text($this->pl->txt('cc_role_id'), $this->pl->txt('cc_role_id_info'))
                          ->withDedicatedName('notification_cc_role_id')
@@ -164,15 +168,15 @@ class NotificationConfigFormGUI
                 $sender = trim((string) ($data['configuration']['notification_sender_user_id'] ?? ''));
                 // Empty sender is stored as '' and disables the mails.
                 if ($sender !== '') {
-                    if (!ctype_digit($sender)) {
-                        $sender = (string) (ilObjUser::_lookupId($sender) ?? '');
-                    }
-                    $user_exists = \ilObject::_exists((int) $sender, false, 'usr');
+                    // Logins first, so numeric logins are not read as ids.
+                    $sender_id = ilObjUser::_lookupId($sender) ?? (ctype_digit($sender) ? (int) $sender : 0);
+                    $user_exists = \ilObject::_exists($sender_id, false, 'usr');
 
                     if (!$user_exists) {
                         $tpl->setOnScreenMessage('failure', $this->pl->txt('not_existing_user'), true);
                         $this->ctrl->redirect(new ilLearningObjectiveSuggestionsConfigGUI(), 'configureNotifications');
                     }
+                    $sender = (string) $sender_id;
                 }
                 $data['configuration']['notification_sender_user_id'] = $sender;
             }
