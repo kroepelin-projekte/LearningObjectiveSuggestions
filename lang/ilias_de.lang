@@ -7,7 +7,7 @@ body#:#Inhalt
 body_blub#:#Blub
 cancel#:#Abbrechen
 cc_role_id#:#Rollen-ID Betreuer
-cc_role_id_info#:#Mitglieder dieser Rolle enthalten eine CC als Mail, wenn die Empfehlungen an einen Benutzer gesendet werden. Um Kurs-Administrator-Rollen auszuwählen, tragen Sie bitte il_crs_admin_<crs_ref_id> in das Feld ein.
+cc_role_id_info#:#ID einer Rolle, deren Mitglieder die Empfehlungsmails in CC erhalten.
 change_udf_study_program#:#UDF Studienprogramm ändern
 change_udf_study_program_info#:#Achtung: Das Ändern vom UDF wirkt sich auf die gesamte folgende Konfiguration aus
 configuration_saved#:#Konfiguration gespeichert
