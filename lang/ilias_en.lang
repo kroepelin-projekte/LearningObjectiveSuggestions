@@ -74,4 +74,4 @@ initial_test_missing#:#Initial Test is missing for refId
 min_points#:#Min Points
 max_points#:#Max Points
 role#:#Role
-not_existing_user#:#There is no user with this ID
+not_existing_user#:#There is no user with this ID or Login
