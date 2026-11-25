@@ -61,11 +61,13 @@ class NotificationConfigFormGUI
     {
         $field = $this->ui->input()->field();
 
-        $sender = $field->numeric($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
-                        ->withStepSize(1)
+        $user_id = (int) $this->config->get('notification_sender_user_id');
+        $username = $user_id > 0 ? ilObjUser::_lookupLogin($this->config->get('notification_sender_user_id')) : '';
+
+        $sender = $field->text($this->pl->txt('sender_user_id'), $this->pl->txt('sender_user_id_info'))
                         ->withRequired(true)
                         ->withDedicatedName('notification_sender_user_id')
-                        ->withValue((string) ($this->config->get('notification_sender_user_id') ?? ''));
+                        ->withValue($username);
 
         $cc_role = $field->text($this->pl->txt('cc_role_id'), $this->pl->txt('cc_role_id_info'))
                          ->withDedicatedName('notification_cc_role_id')
@@ -159,6 +161,10 @@ class NotificationConfigFormGUI
             $tpl = $DIC->ui()->mainTemplate();
 
             if (isset($data['configuration']['notification_sender_user_id'])) {
+
+                if (!ctype_digit($data['configuration']['notification_sender_user_id'])) {
+                    $data['configuration']['notification_sender_user_id'] = ilObjUser::_lookupId($data['configuration']['notification_sender_user_id']) ?? '';
+                }
                 $user_exists = \ilObject::_exists((int) $data['configuration']['notification_sender_user_id'], false, 'usr');
 
                 if (!$user_exists) {

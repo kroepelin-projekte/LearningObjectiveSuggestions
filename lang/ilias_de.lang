@@ -7,7 +7,7 @@ body#:#Inhalt
 body_blub#:#Blub
 cancel#:#Abbrechen
 cc_role_id#:#Rollen-ID Betreuer
-cc_role_id_info#:#Mitglieder dieser Rolle enthalten eine CC als Mail, wenn die Empfehlungen an einen Benutzer gesendet werden. Um nach Kurs-Administrator-Rollen zu suchen, tippen Sie bitte il_crs_admin in das Feld ein, dann werden Ihnen die möglichen Kurse zur Auswahl aufgelistet.
+cc_role_id_info#:#ID einer Rolle, deren Mitglieder die Empfehlungsmails in CC erhalten.
 change_udf_study_program#:#UDF Studienprogramm ändern
 change_udf_study_program_info#:#Achtung: Das Ändern vom UDF wirkt sich auf die gesamte folgende Konfiguration aus
 configuration_saved#:#Konfiguration gespeichert
@@ -44,8 +44,8 @@ ref_id_info#:#Ref-ID eines lernzielorientierten Kurses
 save#:#Speichern
 send_suggestions#:#Lernziel-Empfehlungen versenden
 send_suggestions_description#:#Versendet die berechneten Lernziel-Empfehlungen an Benutzer und Betreuer
-sender_user_id#:#User-ID Absender
-sender_user_id_info#:#User-ID eines ILIAS Benutzers, welcher die Mails versendet.
+sender_user_id#:#User-ID/Login Absender
+sender_user_id_info#:#User-ID oder Login eines ILIAS Benutzers, welcher die Mails versendet.
 subject#:#Betreff
 steps#:#Steps
 templates#:#Vorlagen
@@ -73,4 +73,4 @@ initial_test_missing#:#Der Einstiegstest fehlt für refId
 min_points#:#Mindestpunkte
 max_points#:#Höchstpunkte
 role#:#Rolle
-not_existing_user#:#Es gibt keinen Benutzer mit dieser ID
+not_existing_user#:#Es gibt keinen Benutzer mit dieser ID oder Login
