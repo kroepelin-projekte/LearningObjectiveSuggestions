@@ -106,7 +106,7 @@ global $DIC;
 
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 
-// freeze study program ids (weight_rough_<objective>_<id>) as computed before 2.0.1
+// freeze study program ids (weight_rough_<objective>_<id>) as computed before 2.1.0
 $db = $DIC->database();
 if ($db->tableExists('alo_crs_config') && $db->tableExists('udf_definition')) {
     $configured_ids = [];
