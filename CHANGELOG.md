@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.0]
+### Updated
+
+* sentAt Notification as optional
+
 ## [2.0.0]
 ### Updated
 
