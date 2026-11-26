@@ -113,9 +113,9 @@ class Notification extends \ActiveRecord
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSentAt(): string
+    public function getSentAt(): ?string
     {
         return $this->sent_at;
     }

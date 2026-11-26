@@ -210,7 +210,7 @@ class StudyProgramQuery
     }
 
     /**
-     * Same ids as before 2.1.0: list position after array_unique.
+     * Same ids as before 2.3.0: list position after array_unique.
      * @param array<int, string> $titles
      * @return array<string, int>
      */
