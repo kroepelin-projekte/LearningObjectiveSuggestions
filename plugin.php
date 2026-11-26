@@ -1,6 +1,6 @@
 <?php
 $id = 'dhbwautolo';
-$version = '2.0.1';
+$version = '2.2.0';
 $ilias_min_version = '11.0';
 $ilias_max_version = '11.999';
 $responsible = 'Kröpelin Projekt GmbH';

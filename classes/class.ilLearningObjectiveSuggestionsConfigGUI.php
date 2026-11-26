@@ -474,8 +474,8 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
             $parent_found = false;
             $parent = 0;
-            foreach ($test_ref_ids as $ref_id) {
-                $parent = $DIC->repositoryTree()->getParentId($ref_id);
+            foreach ($test_ref_ids as $test_ref_id) {
+                $parent = $DIC->repositoryTree()->getParentId($test_ref_id);
                 if (in_array($parent, $ref_ids)) {
                     $parent_found = true;
                     break;
@@ -486,8 +486,8 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
                 $course = new LearningObjectiveCourse(new ilObjCourse($parent, true));
 
                 if (!$course->getIsCalculationInactive()) {
-                    foreach ($user_ids as $userId) {
-                        $user = new User(new ilObjUser($userId));
+                    foreach ($user_ids as $user_id) {
+                        $user = new User(new ilObjUser($user_id));
                         if ($this->pl->startCalculation($course, $user)) {
                             $this->pl->sendSuggestions($course, $user);
                         }
