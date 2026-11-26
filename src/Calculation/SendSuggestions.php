@@ -89,9 +89,9 @@ class SendSuggestions
                     }
                 }
             }
-        } catch (\Exception $e) {
-            $this->log->write('Error while trying to assign roles for learning objective suggestions: ' . $e->getMessage());
-            $this->log->write($e->getTraceAsString());
+        } catch (\Throwable $e) {
+            $this->log->write('Error while trying to assign roles for learning objective suggestions');
+            $this->log->writeThrowable($e);
         }
     }
 
@@ -206,9 +206,9 @@ class SendSuggestions
                 $msg = "Failed to send learning objective suggestions for course %s and user %d";
                 $this->log->write(sprintf($msg, $course->getTitle(), $user->getId()));
             }
-        } catch (\Exception $e) {
-            $this->log->write('Error while trying to send learning objective suggestions: ' . $e->getMessage());
-            $this->log->write($e->getTraceAsString());
+        } catch (\Throwable $e) {
+            $this->log->write('Error while trying to send learning objective suggestions');
+            $this->log->writeThrowable($e);
         }
     }
 
