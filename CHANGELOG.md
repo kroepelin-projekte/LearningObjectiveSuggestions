@@ -1,9 +1,9 @@
 # Changelog
 
-## [2.1.0]
-### Updated
+## [2.2.0]
+### Fixed
 
-* sentAt in Notification as optional
+* `Notification::getSentAt()` caused a TypeError for notifications without send date (`sent_at` NULL)
 
 ## [2.0.1]
 ### Fixed
