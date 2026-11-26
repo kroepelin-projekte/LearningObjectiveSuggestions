@@ -1,5 +1,7 @@
 <?php
 
+use ILIAS\HTTP\Wrapper\RequestWrapper;
+use ILIAS\Refinery\Factory as Refinery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\ConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Form\CourseConfigFormGUI;
@@ -13,7 +15,6 @@ use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Notification\TwigParser;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\StudyProgramQuery;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User\User;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Suggestion\LearningObjectiveSuggestion;
-use JetBrains\PhpStorm\NoReturn;
 
 /**
  * Class ilLearningObjectiveSuggestionsConfigGUI
@@ -32,15 +33,9 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     public const string CMD_CONFIGURE_COURSE = 'configureCourse';
 
-    public const string CMD_CONFIRM_DELETE_COURSE_CONFIG = 'confirmDeleteCourse';
-
     public const string CMD_DELETE_COURSE = 'deleteCourse';
 
     public const string CMD_CONFIGURE_NOTIFICATIONS = 'configureNotifications';
-
-    public const string CMD_CONFIGURE_NOTIFICATIONS_USERS_AUTOCOMPLETE = 'configureNotificationsUsersAutocomplete';
-
-    public const string CMD_CONFIGURE_NOTIFICATIONS_ROLES_AUTOCOMPLETE = 'configureNotificationsRolesAutocomplete';
 
     public const string CMD_SAVE_ROLES = 'saveRoles';
 
@@ -69,7 +64,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         self::CMD_SAVE_ROLES,
         self::CMD_CONFIGURE_NOTIFICATIONS,
         self::CMD_SAVE_NOTIFICATIONS,
-        self::CMD_CONFIRM_DELETE_COURSE_CONFIG,
         self::CMD_DELETE_COURSE,
         self::CMD_ACTIVATE_CALCULATION,
         self::CMD_DEACTIVATE_CALCULATION,
@@ -100,11 +94,11 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
 
     protected ilToolbarGUI $toolbar;
 
-    protected ilRbacReview $rbacreview;
-
     protected ilLearningObjectiveSuggestionsPlugin $pl;
 
-    protected ilTree $tree;
+    private RequestWrapper $query;
+
+    private Refinery $refinery;
 
     public function __construct()
     {
@@ -113,9 +107,42 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         $this->ctrl = $DIC->ctrl();
         $this->tabs = $DIC->tabs();
         $this->toolbar = $DIC->toolbar();
-        $this->rbacreview = $DIC->rbac()->review();
         $this->pl = ilLearningObjectiveSuggestionsPlugin::getInstance();
-        $this->tree = $DIC->repositoryTree();
+        $this->query = $DIC->http()->wrapper()->query();
+        $this->refinery = $DIC->refinery();
+    }
+
+    /**
+     * @return int 0 if course_ref_id is missing or not an integer
+     */
+    private function getCourseRefId(): int
+    {
+        return $this->query->retrieve(
+            'course_ref_id',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(0),
+            ])
+        );
+    }
+
+    /**
+     * Returns to the parent unless course_ref_id is an existing course configured in this plugin
+     *
+     * @throws ilCtrlException
+     */
+    private function getConfiguredCourse(): LearningObjectiveCourse
+    {
+        $ref_id = $this->getCourseRefId();
+        // course_ref_ids may hold numeric strings from older data
+        $configured_ref_ids = array_map('intval', (new ConfigProvider())->getCourseRefIds());
+
+        if (in_array($ref_id, $configured_ref_ids, true) && ilObject::_exists($ref_id, true, 'crs')) {
+            return new LearningObjectiveCourse(new ilObjCourse($ref_id));
+        }
+
+        $this->ctrl->returnToParent($this);
+        throw new LogicException('ilCtrl::returnToParent() redirects and does not return');
     }
 
     /***
@@ -230,11 +257,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
             $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE)
         );
 
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $this->initCourseHeader($course);
         $config = new CourseConfigProvider($course);
 
@@ -271,40 +294,19 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
     /**
      * @throws ilCtrlException
      */
-    protected function confirmDeleteCourse(): void
-    {
-        $confirmation_gui = new ilConfirmationGUI();
-        $confirmation_gui->setFormAction($this->ctrl->getFormAction($this));
-        $confirmation_gui->setConfirm($this->pl->txt('delete_learning_objective_course'), self::CMD_DELETE_COURSE, self::CMD_DELETE_COURSE);
-
-        $this->ctrl->setParameter($this, 'cmd', self::CMD_CANCEL);
-
-        $confirmation_gui->setCancel($this->pl->txt('cancel'), self::CMD_CANCEL, self::CMD_CANCEL);
-        $confirmation_gui->setHeaderText($this->pl->txt('confirm_delete_crs'));
-
-        $this->ctrl->clearParameterByClass(self::class, 'course_ref_id');
-        $this->tpl->setContent($confirmation_gui->getHTML());
-    }
-
-    /**
-     * @throws ilCtrlException
-     */
     protected function deleteCourse(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new ConfigProvider();
         $course_config = new CourseConfigProvider($course);
-        $ref_ids = (array) json_decode($config->get('course_ref_ids'), true);
+        $ref_id = $course->getRefId();
+        // normalize to int (older data may hold numeric strings) and reindex so json_encode keeps a list
+        $ref_ids = array_values(array_unique(array_filter(
+            array_map('intval', $config->getCourseRefIds()),
+            static fn(int $id): bool => $id !== $ref_id
+        )));
 
-        if (($key = array_search($_GET['course_ref_id'], $ref_ids)) !== false) {
-            unset($ref_ids[$key]);
-        }
-
-        $config->set('course_ref_ids', json_encode(array_unique($ref_ids)));
+        $config->set('course_ref_ids', json_encode($ref_ids));
         $course_config->delete();
         $this->tpl->setOnScreenMessage('success', $this->pl->txt("course_removed"), true);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
@@ -318,14 +320,10 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
     {
         global $DIC;
 
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
         $renderer = $DIC->ui()->renderer();
 
         $this->addActions(self::TAB_CONFIGURE_NOTIFICATIONS);
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $this->initCourseHeader($course);
         $this->tabs->setBackTarget($this->pl->txt("back"), $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE));
 
@@ -335,149 +333,6 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         $main_form = $notification_config_form->buidForm();
 
         $this->tpl->setContent($renderer->render($main_form));
-    }
-
-    /**
-     * @return void
-     * @throws JsonException
-     */
-    #[NoReturn]
-    protected function configureNotificationsUsersAutocomplete(): void
-    {
-        $term = filter_input(INPUT_GET, 'term');
-
-        // Get users
-        $autocomplete = new ilUserAutoComplete();
-        $autocomplete->setSearchFields([ 'usr_id', 'login', 'firstname', 'lastname', 'email' ]);
-        $autocomplete->setResultField('usr_id');
-        $autocomplete->enableFieldSearchableCheck(false);
-
-        $users = json_decode($autocomplete->getList($term));
-
-        // Format label to lastname, firstname, login
-        $users->items = array_map(function (stdClass $user) {
-            $labels = preg_split("/[(, )( \[)]/", $user->label, - 1, PREG_SPLIT_NO_EMPTY);
-            $labels[2] = isset($labels[2]) ? substr($labels[2], 0, - 1) : '';
-            $labels = [ $labels[0], $labels[1], $labels[2] ];
-            return [
-                'label' => $labels,
-                'value' => $user->value
-            ];
-        }, $users->items);
-
-        // Sort users by labels
-        usort($users->items, function (array $user1, array $user2) {
-            foreach (array_keys($user1['label']) as $i) {
-                $sort1 = strtolower($user1['label'][$i]);
-                $sort2 = strtolower($user2['label'][$i]);
-
-                if ($sort1 > $sort2) {
-                    return 1;
-                }
-                if ($sort1 < $sort2) {
-                    return - 1;
-                }
-            }
-            return 0;
-        });
-
-        // Join labels
-        $users->items = array_map(function (array $user) {
-            $user['label'] = implode(', ', $user['label']);
-
-            return $user;
-        }, $users->items);
-        // Output
-        echo json_encode($users);
-        exit();
-    }
-
-    /**
-     * @return void
-     * @throws ilDatabaseException
-     * @throws ilObjectNotFoundException
-     */
-    #[NoReturn]
-    protected function configureNotificationsRolesAutocomplete(): void
-    {
-        $term = filter_input(INPUT_GET, 'term');
-
-        // Get roles
-        //$roles = json_encode(ilRoleAutoComplete::getList($term)); // ilRoleAutoComplete is bad and not so good configurable like ilUserAutoComplete
-        /**
-         * @var array $roles
-         */
-        $roles = $this->rbacreview->getRolesForIDs([ $term ], false); // Allow search for role id
-        if (count($roles) === 0 || !empty(ilObject::_lookupDeletedDate($roles[0]['parent']))) {
-            $roles = $this->rbacreview->getRolesByFilter(
-                ilRbacReview::FILTER_ALL,
-                0,
-                trim($term)
-            );
-        }
-
-        // Remove roles of deleted parent
-        $roles = array_filter($roles, function (array $role) {
-            return empty(ilObject::_lookupDeletedDate($role['parent'])); // TODO move this to core rbacreview check
-        });
-
-        $roles = array_map(function (array $role) {
-            $labels = [
-                ilObjRole::_getTranslation($role['title'])
-            ];
-            if ($role['role_type'] === 'local') {
-                /**
-                 * @var ilObjCourse|ilObject $parent
-                 */
-                $parent = ilObjectFactory::getInstanceByRefId($role['parent']);
-                $labels[] = $parent->getTitle();
-
-                /**
-                 * @var ilObjCategory|ilObject $parent_parent
-                 */
-                $parent_parent = ilObjectFactory::getInstanceByRefId($this->tree->getParentId($parent->getRefId()));
-                $labels[] = $parent_parent->getTitle();
-            }
-
-            return [
-                'label' => $labels,
-                'value' => $role['obj_id']
-            ];
-        }, $roles);
-
-        // Sort roles by labels
-        usort($roles, function (array $role1, array $role2) {
-            foreach (array_keys($role1['label']) as $i) {
-                $sort1 = strtolower($role1['label'][$i]);
-                $sort2 = strtolower($role2['label'][$i]);
-
-                if ($sort1 > $sort2) {
-                    return 1;
-                }
-                if ($sort1 < $sort2) {
-                    return - 1;
-                }
-            }
-
-            return 0;
-        });
-
-        // Join labels
-        $roles = array_map(function (array $role) {
-            $role['label'] = implode(', ', $role['label']);
-
-            return $role;
-        }, $roles);
-
-        // Output
-        $roles = [
-            'items' => $roles,
-            'hasMoreResults' => false
-        ];
-
-        echo json_encode($roles);
-
-        exit();
     }
 
     /**
@@ -664,11 +519,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function saveNotifications(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
 
         $course_main_config_form = new NotificationConfigFormGUI(
@@ -685,11 +536,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function saveMainConfig(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
 
         $learning_objective_query = new LearningObjectiveQuery($config);
@@ -722,12 +569,8 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function saveRoles(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
         $this->addActions(self::TAB_CONFIGURE_COURSE);
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $this->tabs->setBackTarget(
             $this->pl->txt('back'),
             $this->ctrl->getLinkTarget($this, self::CMD_CONFIGURE)
@@ -755,11 +598,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function activateCalculation(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
         $config->set('is_calculation_inactive', 0);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);
@@ -771,11 +610,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
      */
     protected function deactivateCalculation(): void
     {
-        if(!ilObject::_exists((int) $_GET['course_ref_id'], true, 'crs')) {
-            $this->ctrl->returnToParent($this);
-        }
-
-        $course = new LearningObjectiveCourse(new ilObjCourse((int) $_GET['course_ref_id']));
+        $course = $this->getConfiguredCourse();
         $config = new CourseConfigProvider($course);
         $config->set('is_calculation_inactive', 1);
         $this->ctrl->redirect($this, self::CMD_CONFIGURE);

@@ -79,9 +79,9 @@ class InternalMail
     public function bcc(User|\ilObjRole $user_or_role): static
     {
         if ($user_or_role instanceof User) {
-            $this->cc[] = $user_or_role->getLogin();
+            $this->bcc[] = $user_or_role->getLogin();
         } elseif ($user_or_role instanceof \ilObjRole) {
-            $this->cc[] = "#" . $user_or_role->getTitle();
+            $this->bcc[] = "#" . $user_or_role->getTitle();
         }
         return $this;
     }
@@ -104,8 +104,12 @@ class InternalMail
             false
         );
 
-        if (!empty($result)) {
-            $message = (is_array($result)) ? implode(', ', $result) : $result;
+        if ($result !== []) {
+            // Only language variables: placeholder values may contain logins.
+            $message = implode(', ', array_map(
+                static fn(\ilMailError $error): string => $error->getLanguageVariable(),
+                $result
+            ));
             throw new \ilException("Failed to send mail with error: " . $message);
         }
         return true;
