@@ -127,7 +127,7 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
     }
 
     /**
-     * Returns to the parent (exits) unless course_ref_id is an existing course configured in this plugin
+     * Returns to the parent unless course_ref_id is an existing course configured in this plugin
      *
      * @throws ilCtrlException
      */
@@ -137,11 +137,12 @@ class ilLearningObjectiveSuggestionsConfigGUI extends ilPluginConfigGUI implemen
         // course_ref_ids may hold numeric strings from older data
         $configured_ref_ids = array_map('intval', (new ConfigProvider())->getCourseRefIds());
 
-        if (!in_array($ref_id, $configured_ref_ids, true) || !ilObject::_exists($ref_id, true, 'crs')) {
-            $this->ctrl->returnToParent($this);
+        if (in_array($ref_id, $configured_ref_ids, true) && ilObject::_exists($ref_id, true, 'crs')) {
+            return new LearningObjectiveCourse(new ilObjCourse($ref_id));
         }
 
-        return new LearningObjectiveCourse(new ilObjCourse($ref_id));
+        $this->ctrl->returnToParent($this);
+        throw new LogicException('ilCtrl::returnToParent() redirects and does not return');
     }
 
     /***
