@@ -2,16 +2,24 @@
 
 namespace SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\User;
 
+use Leifos\CascadingSelect\DataObjects\Definition;
+use Leifos\CascadingSelect\DataObjects\Parser;
+use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\ConfigProvider;
 use SRAG\ILIAS\Plugins\LearningObjectiveSuggestions\Config\CourseConfigProvider;
 
 class StudyProgramQuery
 {
     private const string USER_FIELD_TYPE_CASCADING_SELECT = 'Leifos\CascadingSelect\UserFieldType';
-
+    private const string ID_MAP_KEY_PREFIX = 'study_program_ids_';
+    private const string PATH_SEPARATOR = '→';
 
     protected CourseConfigProvider $config;
 
-    protected \ilSetting $udf_setting;
+    /** @var array<string, array|null> */
+    private static array $udf_definitions = [];
+
+    /** @var array<string, Definition|null> */
+    private static array $definitions = [];
 
     /**
      * @param CourseConfigProvider $config
@@ -19,73 +27,67 @@ class StudyProgramQuery
     public function __construct(CourseConfigProvider $config)
     {
         $this->config = $config;
-        $this->udf_setting = new \ilSetting('udfd');
     }
 
-    /**
-     * Returns the StudyProgram of the given User
-     * @param User $user
-     * @return StudyProgram|null
-     */
     public function getByUser(User $user): ?StudyProgram
     {
         global $DIC;
 
         $study_program_field_id = $this->getStudyProgramFieldId();
-
-        $values = [];
-        if (!empty($study_program_field_id)) {
-            $values = $DIC['user']->getProfile()
-                                  ->getDataFor($user->getId())
-                                  ->getAdditionalFieldByIdentifier($study_program_field_id);
-        }
-
-        $title = $values[0] ?? null;
-
-        if ($title == null) {
+        if ($study_program_field_id === null) {
             return null;
         }
-        // The data is separated with an arrow, wtf...
-        //13.04.2021 Modification DHBW from old master
-        if ($this->isCascadingSelect($study_program_field_id)) {
-            $title_exploded = explode("→", $title);
-            list($level1, $title, $_) = array_pad(array_map('trim', $title_exploded), 3, null);
 
-            if (empty($title)) {
-                $title = $level1;
+        $values = $DIC['user']->getProfile()
+                              ->getDataFor($user->getId())
+                              ->getAdditionalFieldByIdentifier($study_program_field_id);
+
+        $title = $values[0] ?? null;
+        if ($title === null || $title === '') {
+            return null;
+        }
+
+        if (self::isCascadingSelect($study_program_field_id)) {
+            $title = self::titleFromPath($title, self::cascadingSelectDefinition($study_program_field_id));
+            if ($title === null) {
+                return null;
             }
         }
-        $filtered = array_filter($this->getAll($user), function ($study_program) use ($title) {
+
+        $filtered = array_filter($this->getAll(), function ($study_program) use ($title) {
             return ($study_program->getTitle() == $title);
         });
 
         return count($filtered) ? array_pop($filtered) : null;
     }
 
-    /**
-     * @return string
-     */
     private function getStudyProgramFieldId(): ?string
+    {
+        return self::resolveFieldId((string) $this->config->get('udf_id_study_program'));
+    }
+
+    /**
+     * Configured value is the field UUID, or the numeric field id from ILIAS <= 10.
+     */
+    public static function resolveFieldId(string $configured_id): ?string
     {
         global $DIC;
 
-        $udf_id_study_programm = $this->config->get('udf_id_study_program');
-
-        if (empty($udf_id_study_programm)) {
+        if ($configured_id === '') {
             return null;
         }
-        $id = (string) $udf_id_study_programm;
-
-        // Validate that $id is not integer. In ILIAS11 it's UUID
-        if (!ctype_digit($id)) {
-            return $id;
+        if (!ctype_digit($configured_id)) {
+            return $configured_id;
         }
 
         $db = $DIC->database();
+        if (!$db->tableExists('udf_field_id_map')) {
+            return null;
+        }
         $res = $db->queryF(
             'SELECT field_id FROM udf_field_id_map WHERE old_field_id = %s',
             [\ilDBConstants::T_INTEGER],
-            [(int) $id]
+            [(int) $configured_id]
         );
         $row = $db->fetchAssoc($res);
 
@@ -93,8 +95,7 @@ class StudyProgramQuery
     }
 
     /**
-     * @param $user
-     * @return array
+     * @return StudyProgram[]
      * @throws \JsonException
      */
     public function getAll(): array
@@ -108,11 +109,12 @@ class StudyProgramQuery
         $programs = [];
 
         $study_program_field_id = $this->getStudyProgramFieldId();
+        if ($study_program_field_id === null) {
+            return [];
+        }
 
-        $field_values = $this->getFieldValues($study_program_field_id);
-
-        // Check if field is of type CascadingSelect
-        if (!$this->isCascadingSelect($study_program_field_id)) {
+        if (!self::isCascadingSelect($study_program_field_id)) {
+            $field_values = self::getFieldValues($study_program_field_id);
             $data = json_decode($field_values, true)
                 ?? unserialize($field_values, ['allowed_classes' => false])
                 ?: [];
@@ -120,35 +122,11 @@ class StudyProgramQuery
                 $programs[] = new StudyProgram($id, $title);
             }
         } else {
-            $study_program_old_filed_id = $this->getOldFieldId($study_program_field_id);
-            $xml = $this->getXMLCascadingSelect($study_program_old_filed_id);
-
-            $program_titles = [];
-            if ($xml !== '') {
-                $parser = new \Leifos\CascadingSelect\DataObjects\Parser(null);
-                $result = $parser->definitionFromXML($xml);
-
-                if ($result->isValid()) {
-                    $definition = $result->definition();
-
-                    // The study programs are options on the second level of all data available on the first level
-                    foreach ($definition->options() as $level1) {
-                        // avoid error if level2 is empty. Use level1->name() as fallback (functionality still to be tested)
-                        if (property_exists($level1, 'child_options') && !empty($level1->childOptions())) {
-                            foreach ($level1->childOptions() as $level2) {
-                                $program_titles[] = $level2->name();
-                            }
-                        } else {
-                            $program_titles[] = $level1->name();
-                        }
-                    }
-                } else {
-                    throw new \RuntimeException('No entry found in udf_plugin_cselect for keyword xml_' . $study_program_old_filed_id);
-                }
-            }
-
-            foreach (array_unique($program_titles) as $id => $title) {
-                $programs[] = new StudyProgram($id, $title);
+            $definition = self::cascadingSelectDefinition($study_program_field_id);
+            $titles = $definition === null ? [] : self::titlesFromDefinition($definition);
+            $ids = self::assignIds($study_program_field_id, $titles);
+            foreach (array_unique($titles) as $title) {
+                $programs[] = new StudyProgram($ids[$title], $title);
             }
         }
         $cache[$config_course_id] = $programs;
@@ -157,98 +135,218 @@ class StudyProgramQuery
     }
 
     /**
-     * @param string $study_program_field_id
-     * @return string
+     * Study programs are the second level options, or the first level option if it has no children.
+     * @return array<int, string> keyed by list position as in 2.0.0 (empty names skipped), duplicates kept
      */
-    protected function getFieldValues(?string $study_program_field_id = null): string
+    public static function titlesFromDefinition(Definition $definition): array
     {
-        if ($study_program_field_id == null) {
-            return '';
+        $names = [];
+        foreach ($definition->options() as $level1) {
+            if ($level1->childOptions() === []) {
+                $names[] = $level1->name();
+                continue;
+            }
+            foreach ($level1->childOptions() as $level2) {
+                $names[] = $level2->name();
+            }
         }
-        $udf_definition = $this->getUdfDefinition($study_program_field_id);
-
-        return (string) ($udf_definition['field_values'] ?? '');
+        return array_filter($names, static fn(string $name): bool => trim($name) !== '');
     }
 
     /**
-     * Check if the the UDF field is of type cascading select
-     *
-     * @param $study_program_field_id
-     * @return bool
+     * Returns the stored title => id map of the field; unknown titles get max + 1, so weight_rough_* keys stay valid.
+     * @param array<int, string> $titles
+     * @return array<string, int>
      */
-    protected function isCascadingSelect($study_program_field_id): bool
+    private static function assignIds(string $field_id, array $titles): array
     {
-        $udf_definition = $this->getUdfDefinition($study_program_field_id);
-
-        // type is hardcoded here, since CascadingSelect may be not installed
-        return ((string) $udf_definition['field_type'] === self::USER_FIELD_TYPE_CASCADING_SELECT);
+        $stored = self::loadIds($field_id);
+        $ids = self::appendIds($stored === [] ? self::initialIds($field_id, $titles) : $stored, $titles);
+        if ($ids !== $stored) {
+            self::saveIds($field_id, $ids);
+        }
+        return $ids;
     }
 
     /**
-     * @param string $study_programm_field_id
-     * @return array|null
+     * Rewrites the map with the ids of the frozen XML as base, so a map created before the update step is corrected.
+     * @param array<int, string> $titles
+     * @return array<string, int>
      */
-    private function getUdfDefinition(string $study_programm_field_id)
+    public static function rebuildIds(string $field_id, array $titles): array
+    {
+        $stored = self::loadIds($field_id);
+        $legacy_titles = self::legacyTitles($field_id);
+        $base = $legacy_titles !== null
+            ? self::appendIds(self::positionIds($legacy_titles), array_keys($stored))
+            : ($stored === [] ? self::positionIds($titles) : $stored);
+        $ids = self::appendIds($base, $titles);
+        if ($ids !== $stored) {
+            self::saveIds($field_id, $ids);
+        }
+        return $ids;
+    }
+
+    public static function cascadingSelectDefinition(string $field_id): ?Definition
+    {
+        if (array_key_exists($field_id, self::$definitions)) {
+            return self::$definitions[$field_id];
+        }
+        // CascadingSelect component may be missing although the field type is still stored
+        $definition = null;
+        if (class_exists(Parser::class) && self::isCascadingSelect($field_id)) {
+            $definition = (new Parser(null))->unserializeDefinition(self::getFieldValues($field_id));
+        }
+        return self::$definitions[$field_id] = $definition;
+    }
+
+    /**
+     * @param array<int, string> $titles
+     * @return array<string, int>
+     */
+    private static function initialIds(string $field_id, array $titles): array
+    {
+        return self::positionIds(self::legacyTitles($field_id) ?? $titles);
+    }
+
+    /**
+     * Same ids as before 2.0.1: list position after array_unique.
+     * @param array<int, string> $titles
+     * @return array<string, int>
+     */
+    private static function positionIds(array $titles): array
+    {
+        return array_flip(array_unique($titles));
+    }
+
+    /**
+     * @param array<string, int> $ids
+     * @param array<int, string|int> $titles
+     * @return array<string, int>
+     */
+    private static function appendIds(array $ids, array $titles): array
+    {
+        foreach ($titles as $title) {
+            if (!array_key_exists($title, $ids)) {
+                $ids[$title] = $ids === [] ? 0 : max($ids) + 1;
+            }
+        }
+        return $ids;
+    }
+
+    /**
+     * Titles from the XML of the old CascadingSelect plugin (ILIAS <= 10), on which the existing weights are based.
+     * @return array<int, string>|null
+     */
+    private static function legacyTitles(string $field_id): ?array
     {
         global $DIC;
 
         $db = $DIC->database();
+        if (!class_exists(Parser::class)
+            || !$db->tableExists('udf_field_id_map')
+            || !$db->tableExists('udf_plugin_cselect')
+        ) {
+            return null;
+        }
 
+        $res = $db->queryF(
+            'SELECT old_field_id FROM udf_field_id_map WHERE field_id = %s',
+            [\ilDBConstants::T_TEXT],
+            [$field_id]
+        );
+        $map_row = $db->fetchAssoc($res);
+        if ($map_row === null) {
+            return null;
+        }
+
+        $res = $db->queryF(
+            'SELECT keyword_value FROM udf_plugin_cselect WHERE keyword = %s',
+            [\ilDBConstants::T_TEXT],
+            ['xml_' . $map_row['old_field_id']]
+        );
+        $xml = (string) ($db->fetchAssoc($res)['keyword_value'] ?? '');
+        if ($xml === '') {
+            return null;
+        }
+
+        $result = (new Parser(null))->definitionFromXML($xml);
+        return $result->isValid() ? self::titlesFromDefinition($result->definition()) : null;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private static function loadIds(string $field_id): array
+    {
+        $stored = (new ConfigProvider())->get(self::ID_MAP_KEY_PREFIX . $field_id);
+        return array_map('intval', (array) json_decode($stored ?? '', true));
+    }
+
+    /**
+     * @param array<string, int> $ids
+     */
+    private static function saveIds(string $field_id, array $ids): void
+    {
+        (new ConfigProvider())->set(
+            self::ID_MAP_KEY_PREFIX . $field_id,
+            json_encode($ids, JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR)
+        );
+    }
+
+    /**
+     * Profile values look like "A → B → C"; the component fills missing levels with the column defaults,
+     * e.g. "DuO → Allgemein → keine", so the title depends on whether A has children.
+     */
+    private static function titleFromPath(string $value, ?Definition $definition): ?string
+    {
+        [$level1, $level2] = array_pad(array_map('trim', explode(self::PATH_SEPARATOR, $value)), 2, '');
+
+        foreach ($definition?->options() ?? [] as $option) {
+            if (trim($option->name()) !== $level1) {
+                continue;
+            }
+            if ($option->childOptions() === []) {
+                return $option->name();
+            }
+            foreach ($option->childOptions() as $child) {
+                if (trim($child->name()) === $level2) {
+                    return $child->name();
+                }
+            }
+            return null;
+        }
+
+        return null;
+    }
+
+    private static function getFieldValues(string $study_program_field_id): string
+    {
+        return (string) (self::getUdfDefinition($study_program_field_id)['field_values'] ?? '');
+    }
+
+    private static function isCascadingSelect(string $study_program_field_id): bool
+    {
+        // type hardcoded: CascadingSelect may not be installed
+        return (string) (self::getUdfDefinition($study_program_field_id)['field_type'] ?? '')
+            === self::USER_FIELD_TYPE_CASCADING_SELECT;
+    }
+
+    private static function getUdfDefinition(string $study_programm_field_id): ?array
+    {
+        global $DIC;
+
+        if (array_key_exists($study_programm_field_id, self::$udf_definitions)) {
+            return self::$udf_definitions[$study_programm_field_id];
+        }
+
+        $db = $DIC->database();
         $res = $db->queryF(
             'SELECT * FROM udf_definition WHERE field_id = %s',
             [\ilDBConstants::T_TEXT],
             [$study_programm_field_id]
         );
-        $row = $db->fetchAssoc($res);
 
-        return $row;
-    }
-
-    /**
-     * @param string $field_id
-     * @return mixed|null
-     */
-    private function getOldFieldId(string $field_id)
-    {
-        global $DIC;
-
-        $query = 'SELECT * FROM udf_field_id_map WHERE field_id = %s';
-
-        $results = $DIC->database()->queryF(
-            $query,
-            ['text'],
-            [$field_id]
-        );
-
-        $old_field_id = null;
-        while ($row = $DIC->database()->fetchAssoc($results)) {
-            $old_field_id = $row['old_field_id'];
-        }
-        return $old_field_id;
-    }
-
-    /**
-     * @param string $old_field_id
-     * @return string
-     * @throws \JsonException
-     */
-    private function getXMLCascadingSelect(string $old_field_id)
-    {
-        global $DIC;
-        $db = $DIC->database();
-
-        $xml = '';
-
-        $res = $db->queryF(
-            'SELECT keyword_value FROM udf_plugin_cselect WHERE keyword = %s',
-            [\ilDBConstants::T_TEXT],
-            ['xml_' . $old_field_id]
-        );
-
-        $xml = '';
-        if ($row = $db->fetchAssoc($res)) {
-            $xml = (string) $row['keyword_value'];
-        }
-        return $xml;
+        return self::$udf_definitions[$study_programm_field_id] = $db->fetchAssoc($res);
     }
 }
