@@ -153,8 +153,8 @@ class NotificationConfigFormGUI
 
         if (
             $request->getMethod() == 'POST'
-            && array_key_exists('ref_id', $request->getQueryParams())
-            && array_key_exists('course_ref_id', $request->getQueryParams())
+            && $DIC->http()->wrapper()->query()->has('ref_id')
+            && $DIC->http()->wrapper()->query()->has('course_ref_id')
         ) {
             $form = $form->withRequest($request);
             $data = $form->getData();
