@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.0.1]
 ### Fixed
 
 * Mail errors from `ilMail::enqueue()` (`ilMailError` objects) caused a fatal error instead of being logged
