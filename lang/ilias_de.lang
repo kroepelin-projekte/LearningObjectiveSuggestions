@@ -57,8 +57,8 @@ delete_learning_objective_course#:#Löschen
 confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht!
 cancel#:#Abbrechen
 course_removed#:#Lernzielorientierter Kurs wurde entfernt.
-deactivate_calculation#:#Calculation deaktivieren
-activate_calculation#:#Calculation aktivieren
+deactivate_calculation#:#Berechnung deaktivieren
+activate_calculation#:#Berechnung aktivieren
 role_assignment#:#Rollenzuweisung
 role_assignment_config#:#Rollenzuweisung Konfiguration
 calculation#:#Berechnung
