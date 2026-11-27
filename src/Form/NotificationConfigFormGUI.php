@@ -39,7 +39,8 @@ class NotificationConfigFormGUI
      * @param Parser               $parser
      */
     public function __construct(
-        CourseConfigProvider $config, Parser $parser
+        CourseConfigProvider $config,
+        Parser $parser
     ) {
         global $DIC;
 
@@ -104,12 +105,12 @@ class NotificationConfigFormGUI
             $placeholderList = $this->ui->listing()->unordered($available_placeholders);
 
             $placeholders_array = [];
-            foreach($placeholderList->getItems() as $key =>$list) {
+            foreach ($placeholderList->getItems() as $key => $list) {
                 $placeholders_array[] = "&lbrace;&lbrace; {$key} &rbrace;&rbrace; : {$this->pl->txt($list)}";
             }
 
-            $placeholderListHtml = '<br>' . $this->pl->txt("placeholders_info") . '<br><br>';
-            foreach($placeholders_array as $val) {
+            $placeholderListHtml = $this->pl->txt('body_info') . '<br><br>' . $this->pl->txt("placeholders_info") . '<br><br>';
+            foreach ($placeholders_array as $val) {
                 $placeholderListHtml .= $val . '<br>';
             }
 

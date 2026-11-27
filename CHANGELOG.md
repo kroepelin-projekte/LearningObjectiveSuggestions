@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+
+* Missing language entry `body_info` for the mail content in the notification settings (shown as `-body_info-`)
+* Duplicate language entries `cancel` and `calculation` removed (the effective texts are unchanged)
+
+### Notes
+
+* After updating, refresh the plugin languages (Administration → Plugins → Refresh Languages), since the version is unchanged
+
 ## [2.2.0]
 ### Fixed
 
