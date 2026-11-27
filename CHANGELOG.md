@@ -5,6 +5,7 @@
 
 * Missing language entry `body_info` for the mail content in the notification settings (shown as `-body_info-`)
 * Duplicate language entries `cancel` and `calculation` removed (the effective texts are unchanged)
+* German language file: English words in the texts for activating and deactivating the calculation translated
 
 ### Notes
 
