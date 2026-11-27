@@ -112,7 +112,7 @@ class NotificationConfigFormGUI
                 $placeholders_array[] = "&lbrace;&lbrace; {$key} &rbrace;&rbrace; : {$this->pl->txt($list)}";
             }
 
-            $placeholderListHtml = '<br>' . $this->pl->txt("placeholders_info") . '<br><br>';
+            $placeholderListHtml = $this->pl->txt('body_info') . '<br><br>' . $this->pl->txt("placeholders_info") . '<br><br>';
             foreach ($placeholders_array as $val) {
                 $placeholderListHtml .= $val . '<br>';
             }

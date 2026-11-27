@@ -4,8 +4,7 @@ back#:#Zurück
 basic_configuration#:#Basis-Konfiguration
 bias#:#Bias
 body#:#Inhalt
-body_blub#:#Blub
-cancel#:#Abbrechen
+body_info#:#Text der Empfehlungsmail.
 cc_role_id#:#Rollen-ID Betreuer
 cc_role_id_info#:#ID einer Rolle, deren Mitglieder die Empfehlungsmails in CC erhalten.
 change_udf_study_program#:#UDF Studienprogramm ändern
@@ -54,7 +53,6 @@ udf_study_program#:#UDF Studienprogramm
 udf_study_program_info#:#UDF Dropdown Feld, welches die Studiengänge enthält
 weight_fine#:#Feingewichte
 weight_rough#:#Grobgewichte
-calculation#:#Calculation Aktiv
 delete_learning_objective_course#:#Löschen
 confirm_delete_crs#:#Wollen Sie den Lernzielorientierten Kurs wirklich löschen? Sämtliche Daten werden gelöscht!
 cancel#:#Abbrechen

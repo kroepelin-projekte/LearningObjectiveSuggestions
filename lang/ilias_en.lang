@@ -4,8 +4,7 @@ back#:#Back
 basic_configuration#:#Basic Configuration
 bias#:#Bias
 body#:#Content
-body_blub#:#Blub
-cancel#:#Cancel
+body_info#:#Text of the recommendation email.
 cc_role_id#:#CC Role ID Supervisor
 cc_role_id_info#:#ID of a role whose members receive the recommendation emails in CC.
 change_udf_study_program#:#Change UDF Study Program
@@ -54,7 +53,6 @@ udf_study_program#:#UDF Study Program
 udf_study_program_info#:#UDF Dropdown field containing study programs
 weight_fine#:#Fine Weights
 weight_rough#:#Rough Weights
-calculation#:#Calculation Active
 delete_learning_objective_course#:#Delete
 confirm_delete_crs#:#Do you really want to delete the learning objective course? All data will be deleted!
 cancel#:#Cancel
